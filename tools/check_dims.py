@@ -269,6 +269,75 @@ chk("支撑台直径小于轴体间隙", sup_d < sw_gap,
     f"{f(sup_d)} < {f(sw_gap)}",
     "支撑台太粗会顶住轴体塑料脚，装不进去")
 
+# ---- 11. 主控必须放得下（板面被轴体占满就会放不下）--------------------------
+# 这是「设计能做出来」与「做不出来」的分界线：
+# 14 个轴体本体几乎占满 86×50 的板面，主控（17.8×33）可能根本无处可放。
+print("\n【主控放置可行性】")
+NANO_W, NANO_L = P["NANO_W"], P["NANO_L"]
+PCB_W, PCB_H = P["PCB_W"], P["PCB_H"]
+PCB_OFF = (P["PLATE_W"] - PCB_W) / 2      # 定位板坐标 → PCB 坐标 的偏移
+
+n_sw = lambda u: 1 if u <= 1 else (2 if u == 2 else 3)
+
+sw_pos = []
+for (c, r, u, tag) in KM:
+    for i in range(n_sw(u)):
+        if u <= 1:
+            px = P["PLATE_BORDER"] + (c - 1) * P["PITCH"] + P["PITCH"] * 0.5
+        else:
+            px = (P["PLATE_BORDER"] + (c - 1) * P["PITCH"]
+                  + P["PITCH"] * (0.5 + i * (u - 1) / (n_sw(u) - 1)))
+        py = P["PLATE_BORDER"] + (r - 1) * P["PITCH"] + P["PITCH"] / 2
+        sw_pos.append((tag, round(px - PCB_OFF, 2), round(py - PCB_OFF, 2)))
+
+_h = SW_BODY_W / 2
+
+
+def _overlap(nx, ny):
+    """主控矩形与所有轴体本体的重叠面积（mm²）"""
+    tot = 0.0
+    for (_, sx, sy) in sw_pos:
+        ox = max(0.0, min(sx + _h, nx + NANO_W) - max(sx - _h, nx))
+        oy = max(0.0, min(sy + _h, ny + NANO_L) - max(sy - _h, ny))
+        tot += ox * oy
+    return tot
+
+
+# 主控当前设计位置（对应 case_bottom.scad 的 NANO_X / NANO_Y，PCB 坐标）
+NANO_X = PCB_W - 3.0 - NANO_W
+NANO_Y = PCB_H - 3.0 - NANO_L
+cur = _overlap(NANO_X, NANO_Y)
+
+print(f"  板面       : {f(PCB_W)} × {f(PCB_H)} mm")
+print(f"  主控       : {f(NANO_W)} × {f(NANO_L)} mm（{f(P['NANO_H'])} 厚）")
+print(f"  轴体本体   : {f(SW_BODY_W)} mm 见方 × {len(sw_pos)} 个")
+print(f"  设计位置   : ({f(NANO_X)}, {f(NANO_Y)})  → 与轴体重叠 {f(cur)} mm²")
+
+chk("主控在板面上不与轴体重叠", cur == 0,
+    f"重叠 {f(cur)} mm²",
+    "主控必须移到 PCB 背面，或改用更小的主控模块（见 docs/PCB设计规格书.md §14）")
+
+# 穷举板面，看还有没有别的位置
+valid = 0
+_x = 0.0
+while _x <= PCB_W - NANO_W + 0.01:
+    _y = 0.0
+    while _y <= PCB_H - NANO_L + 0.01:
+        if _overlap(round(_x, 1), round(_y, 1)) == 0:
+            valid += 1
+        _y += 0.5
+    _x += 0.5
+
+chk("板面上存在可放置主控的位置", valid > 0,
+    f"共 {valid} 个候选位（步长 0.5mm）",
+    "板面被轴体占满 —— 主控只能放 PCB 背面（需同步挪支撑台、下移 USB 开孔）")
+
+# 背面可行性：层高够不够
+back_ok = P["NANO_H"] <= P["PCB_STANDOFF_H"]
+chk("主控厚度能放进 PCB 下方层", back_ok,
+    f"{f(P['NANO_H'])} ≤ {f(P['PCB_STANDOFF_H'])} mm",
+    "改用更薄的主控或加高 PCB 支撑台")
+
 # ---- 汇总 -------------------------------------------------------------------
 print("\n" + "=" * 72)
 failed = [r for r in results if not r[1]]

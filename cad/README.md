@@ -15,7 +15,7 @@
 |---|---|---|
 | `view_model.py` | 纯 Python | **在浏览器里看三维模型** |
 | `lint_scad.py` | 纯 Python | SCAD 语法与符号检查 |
-| `check_dims.py` | 纯 Python | 23 项结构设计规则 |
+| `check_dims.py` | 纯 Python | 26 项结构设计规则 |
 | `verify_geometry.py` | 纯 Python | 孔位/对位验证 |
 | `check_keymap.py` | 纯 Python | 固件 ↔ 结构一致性 |
 | `verify_stl.py` | 纯 Python | STL 校验（读文件，不需要 CAD 软件） |
@@ -86,7 +86,7 @@ cad/
 tools/
 ├── check_env.py             ← 环境自检（先跑这个）
 ├── view_model.py            ← ★ 在浏览器里看三维模型（不需要 CAD）
-├── check_dims.py            ← 设计规则校验（23 项）
+├── check_dims.py            ← 设计规则校验（26 项）
 ├── lint_scad.py             ← 语法与符号检查
 ├── verify_geometry.py       ← 孔位与对位验证
 ├── verify_stl.py            ← STL 校验（尺寸/水密性/体积）
