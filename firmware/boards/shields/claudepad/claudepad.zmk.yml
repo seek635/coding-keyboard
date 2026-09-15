@@ -1,0 +1,8 @@
+file_format: "1"
+id: claudepad
+name: ClaudePad
+type: shield
+url: https://github.com/your-name/claudepad
+requires: [pro_micro]
+features:
+  - keys

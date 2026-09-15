@@ -1,0 +1,8 @@
+# GitHub Actions 构建配置
+# -----------------------------------------------------------------------------
+# 推送到 GitHub 后，Actions 会自动编译并产出 .uf2 固件，可在 Artifacts 里下载。
+# 也可以本地构建（见 README.md）。
+---
+include:
+  - board: nice_nano_v2
+    shield: claudepad

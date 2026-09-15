@@ -1,0 +1,5 @@
+name: zmk-keyboard-claudepad
+build:
+  cmake: .
+  settings:
+    board_root: .

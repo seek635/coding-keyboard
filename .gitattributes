@@ -1,0 +1,15 @@
+# 统一换行符：仓库内一律 LF，避免 Windows / macOS / Linux 差异
+* text=auto eol=lf
+
+# 二进制文件不做任何转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.stl  binary
+*.zip  binary
+*.3mf  binary
+
+# 3D 打印的 STL 在 diff 里不可读，折叠显示
+*.stl -diff

@@ -1,0 +1,453 @@
+{
+  "board": "ClaudePad",
+  "matrix": {
+    "rows": 3,
+    "cols": 6
+  },
+  "pinout": {
+    "rows": [
+      "D4",
+      "D5",
+      "D6"
+    ],
+    "cols": [
+      "D7",
+      "D8",
+      "D9",
+      "D10",
+      "D16",
+      "D14"
+    ],
+    "approve": "D14",
+    "rgb_data": "D15"
+  },
+  "diode_direction": "col2row",
+  "diode_rule": "阳极接列线，阴极接行线（电流 列 → 行）",
+  "switch_footprint": {
+    "name": "Kailh Choc V1 (PG1350)",
+    "pad1": [
+      0.0,
+      5.9
+    ],
+    "pad2": [
+      -5.0,
+      3.8
+    ],
+    "center_hole": [
+      0.0,
+      0.0
+    ],
+    "side_holes": [
+      [
+        -5.5,
+        0.0
+      ],
+      [
+        5.5,
+        0.0
+      ]
+    ],
+    "pad_drill_mm": 1.27,
+    "pad_size_mm": 2.0
+  },
+  "rows": [
+    {
+      "name": "ROW1",
+      "pin": "D4",
+      "keys": [
+        "PERM",
+        "UP",
+        "MODEL",
+        "CMD",
+        "STOP",
+        "APPROVE"
+      ]
+    },
+    {
+      "name": "ROW2",
+      "pin": "D5",
+      "keys": [
+        "LEFT",
+        "DOWN",
+        "RIGHT",
+        "ENTER"
+      ]
+    },
+    {
+      "name": "ROW3",
+      "pin": "D6",
+      "keys": [
+        "SPACE",
+        "VOICE"
+      ]
+    }
+  ],
+  "cols": [
+    {
+      "name": "COL1",
+      "pin": "D7",
+      "keys": [
+        "PERM",
+        "LEFT",
+        "SPACE"
+      ]
+    },
+    {
+      "name": "COL2",
+      "pin": "D8",
+      "keys": [
+        "UP",
+        "DOWN"
+      ]
+    },
+    {
+      "name": "COL3",
+      "pin": "D9",
+      "keys": [
+        "MODEL",
+        "RIGHT"
+      ]
+    },
+    {
+      "name": "COL4",
+      "pin": "D10",
+      "keys": [
+        "CMD",
+        "ENTER"
+      ]
+    },
+    {
+      "name": "COL5",
+      "pin": "D16",
+      "keys": [
+        "STOP",
+        "VOICE"
+      ]
+    },
+    {
+      "name": "COL6",
+      "pin": "D14",
+      "keys": [
+        "APPROVE"
+      ]
+    }
+  ],
+  "keys": [
+    {
+      "label": "PERM",
+      "row": 1,
+      "col": 1,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW1",
+      "net_col": "COL1",
+      "pin_row": "D4",
+      "pin_col": "D7",
+      "diode": "1N4148",
+      "positions": [
+        [
+          15.0,
+          15.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          7.0,
+          7.0
+        ]
+      ]
+    },
+    {
+      "label": "UP",
+      "row": 1,
+      "col": 2,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW1",
+      "net_col": "COL2",
+      "pin_row": "D4",
+      "pin_col": "D8",
+      "diode": "1N4148",
+      "positions": [
+        [
+          33.0,
+          15.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          25.0,
+          7.0
+        ]
+      ]
+    },
+    {
+      "label": "MODEL",
+      "row": 1,
+      "col": 3,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW1",
+      "net_col": "COL3",
+      "pin_row": "D4",
+      "pin_col": "D9",
+      "diode": "1N4148",
+      "positions": [
+        [
+          51.0,
+          15.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          43.0,
+          7.0
+        ]
+      ]
+    },
+    {
+      "label": "CMD",
+      "row": 1,
+      "col": 4,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW1",
+      "net_col": "COL4",
+      "pin_row": "D4",
+      "pin_col": "D10",
+      "diode": "1N4148",
+      "positions": [
+        [
+          69.0,
+          15.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          61.0,
+          7.0
+        ]
+      ]
+    },
+    {
+      "label": "STOP",
+      "row": 1,
+      "col": 5,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW1",
+      "net_col": "COL5",
+      "pin_row": "D4",
+      "pin_col": "D16",
+      "diode": "1N4148",
+      "positions": [
+        [
+          87.0,
+          15.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          79.0,
+          7.0
+        ]
+      ]
+    },
+    {
+      "label": "LEFT",
+      "row": 2,
+      "col": 1,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW2",
+      "net_col": "COL1",
+      "pin_row": "D5",
+      "pin_col": "D7",
+      "diode": "1N4148",
+      "positions": [
+        [
+          15.0,
+          33.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          7.0,
+          25.0
+        ]
+      ]
+    },
+    {
+      "label": "DOWN",
+      "row": 2,
+      "col": 2,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW2",
+      "net_col": "COL2",
+      "pin_row": "D5",
+      "pin_col": "D8",
+      "diode": "1N4148",
+      "positions": [
+        [
+          33.0,
+          33.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          25.0,
+          25.0
+        ]
+      ]
+    },
+    {
+      "label": "RIGHT",
+      "row": 2,
+      "col": 3,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW2",
+      "net_col": "COL3",
+      "pin_row": "D5",
+      "pin_col": "D9",
+      "diode": "1N4148",
+      "positions": [
+        [
+          51.0,
+          33.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          43.0,
+          25.0
+        ]
+      ]
+    },
+    {
+      "label": "ENTER",
+      "row": 2,
+      "col": 4,
+      "width_u": 2,
+      "switches": 2,
+      "net_row": "ROW2",
+      "net_col": "COL4",
+      "pin_row": "D5",
+      "pin_col": "D10",
+      "diode": "1N4148",
+      "positions": [
+        [
+          69.0,
+          33.0
+        ],
+        [
+          87.0,
+          33.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          61.0,
+          25.0
+        ],
+        [
+          79.0,
+          25.0
+        ]
+      ]
+    },
+    {
+      "label": "SPACE",
+      "row": 3,
+      "col": 1,
+      "width_u": 4,
+      "switches": 3,
+      "net_row": "ROW3",
+      "net_col": "COL1",
+      "pin_row": "D6",
+      "pin_col": "D7",
+      "diode": "1N4148",
+      "positions": [
+        [
+          15.0,
+          51.0
+        ],
+        [
+          42.0,
+          51.0
+        ],
+        [
+          69.0,
+          51.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          7.0,
+          43.0
+        ],
+        [
+          34.0,
+          43.0
+        ],
+        [
+          61.0,
+          43.0
+        ]
+      ]
+    },
+    {
+      "label": "VOICE",
+      "row": 3,
+      "col": 5,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW3",
+      "net_col": "COL5",
+      "pin_row": "D6",
+      "pin_col": "D16",
+      "diode": "1N4148",
+      "positions": [
+        [
+          87.0,
+          51.0
+        ]
+      ],
+      "pcb_positions": [
+        [
+          79.0,
+          43.0
+        ]
+      ]
+    },
+    {
+      "label": "APPROVE",
+      "row": 1,
+      "col": 6,
+      "width_u": 1,
+      "switches": 1,
+      "net_row": "ROW1",
+      "net_col": "COL6",
+      "pin_row": "D4",
+      "pin_col": "D14",
+      "diode": "1N4148（建议）",
+      "positions": [],
+      "pcb_positions": [],
+      "note": "SPDT 拨动开关，不是轴体。装在右壁，本体在壳内，公共端接 ROW1、常开端接 COL6"
+    }
+  ],
+  "total_switches": 14,
+  "pcb": {
+    "width": 86.0,
+    "height": 50.0,
+    "thickness": 1.6,
+    "origin_offset_from_plate": [
+      8.0,
+      8.0
+    ],
+    "notch_depth": 8.0,
+    "notch_length": 24.0,
+    "notch_note": "右侧开缺口让位给拨杆本体，纵向对准拨杆位置"
+  }
+}

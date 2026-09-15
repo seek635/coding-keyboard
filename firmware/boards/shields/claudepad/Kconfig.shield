@@ -1,0 +1,4 @@
+# ClaudePad shield 标识
+# 注意：逗号后和键盘名中不能有空格
+config SHIELD_CLAUDEPAD
+    def_bool $(shields_list_contains,claudepad)

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 900" width="1180" height="900" font-family="-apple-system, Segoe UI, Microsoft YaHei, sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40.0" y="46.0" font-size="24" fill="#111827" text-anchor="start" font-weight="600">按键行程剖面图</text>
+<text x="40.0" y="74.0" font-size="13" fill="#6b7280" text-anchor="start">键帽裙边比定位板轴孔宽，塞不进孔里 —— 所以键帽必须整体悬在板上方，下压时不能撞到板</text>
+<rect x="100.0" y="560.0" width="660.0" height="55.2" rx="0" fill="#d8c88c" stroke="#a68a3f" stroke-width="1.5"/>
+<rect x="361.0" y="560.0" width="138.0" height="55.2" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<rect x="362.5" y="449.6" width="135.0" height="110.4" rx="0" fill="#cfe3f7" stroke="#4a86c8" stroke-width="1.5"/>
+<rect x="424.5" y="477.2" width="11.0" height="82.8" rx="0" fill="#9dc0e8" stroke="#2f6ba8" stroke-width="1.5"/>
+<line x1="420.5" y1="485.2" x2="384.5" y2="485.2" stroke="#2f6ba8" stroke-width="1"/>
+<text x="378.5" y="489.2" font-size="11" fill="#2f6ba8" text-anchor="end">轴芯</text>
+<polygon points="342.0,408.2 518.0,408.2 512.0,178.2 348.0,178.2" fill="#f5d0c0" stroke="#c4633c" stroke-width="2"/>
+<polygon points="360.0,410.2 500.0,410.2 497.6,176.2 362.4,176.2" fill="#ffffff" stroke="none" stroke-width="1"/>
+<rect x="422.5" y="408.2" width="15.0" height="230.0" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<text x="532.0" y="293.2" font-size="13" fill="#c4633c" text-anchor="start">键帽（静止）</text>
+<line x1="342.0" y1="546.2" x2="518.0" y2="546.2" stroke="#c4633c" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="342.0" y1="546.2" x2="348.0" y2="316.2" stroke="#c4633c" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="518.0" y1="546.2" x2="512.0" y2="316.2" stroke="#c4633c" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="348.0" y1="316.2" x2="512.0" y2="316.2" stroke="#c4633c" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="532.0" y="431.2" font-size="13" fill="#c4633c" text-anchor="start">键帽（按到底）</text>
+<line x1="282.0" y1="408.2" x2="282.0" y2="546.2" stroke="#0f6e56" stroke-width="2"/>
+<line x1="282.0" y1="412.2" x2="282.0" y2="542.2" stroke="#0f6e56" stroke-width="2"/>
+<line x1="282.0" y1="542.2" x2="279.0" y2="535.9" stroke="#0f6e56" stroke-width="2"/>
+<line x1="282.0" y1="542.2" x2="285.0" y2="535.9" stroke="#0f6e56" stroke-width="2"/>
+<text x="270.0" y="477.2" font-size="13" fill="#0f6e56" text-anchor="end" font-weight="600">键程 3.00</text>
+<line x1="648.0" y1="560.0" x2="648.0" y2="408.2" stroke="#b45309" stroke-width="2"/>
+<line x1="648.0" y1="564.0" x2="648.0" y2="404.2" stroke="#b45309" stroke-width="2"/>
+<line x1="648.0" y1="404.2" x2="651.0" y2="410.5" stroke="#b45309" stroke-width="2"/>
+<line x1="648.0" y1="404.2" x2="645.0" y2="410.5" stroke="#b45309" stroke-width="2"/>
+<text x="660.0" y="484.1" font-size="13" fill="#b45309" text-anchor="start" font-weight="600">键帽底面离定位板 3.30</text>
+<text x="40.0" y="690.0" font-size="13" fill="#c4633c" text-anchor="start">键帽裙边宽 17.60 mm</text>
+<text x="40.0" y="712.0" font-size="13" fill="#a68a3f" text-anchor="start">定位板轴孔宽 13.80 mm</text>
+<text x="40.0" y="734.0" font-size="13" fill="#111827" text-anchor="start">→ 裙边比孔宽 3.80 mm，塞不进孔里</text>
+<text x="40.0" y="772.0" font-size="13" fill="#111827" text-anchor="start">结论：键帽只能悬在定位板上方，所以</text>
+<text x="40.0" y="794.0" font-size="13" fill="#111827" text-anchor="start">  ① 键帽底面离定位板 ≥ 轴体键程（3.30 ≥ 3.00）</text>
+<text x="40.0" y="816.0" font-size="13" fill="#111827" text-anchor="start">  ② 否则裙边会撞在定位板上，按不下去</text>
+<rect x="700.0" y="660.0" width="440.0" height="190.0" rx="10" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+<text x="718.0" y="688.0" font-size="14" fill="#b91c1c" text-anchor="start" font-weight="600">这次的 bug</text>
+<text x="718.0" y="714.0" font-size="12" fill="#4b5563" text-anchor="start">原来：间隙 0.30mm，键程需要 3.00mm</text>
+<text x="718.0" y="734.0" font-size="12" fill="#b91c1c" text-anchor="start">→ 按 0.3mm 就顶死，行程全废</text>
+<text x="718.0" y="766.0" font-size="12" fill="#4b5563" text-anchor="start">修正后：间隙 3.30mm ≥ 键程 3.00mm</text>
+<text x="718.0" y="786.0" font-size="12" fill="#0f6e56" text-anchor="start">→ 完整 3mm 行程可用</text>
+<text x="718.0" y="818.0" font-size="12" fill="#6b7280" text-anchor="start">代价：整机高度 20.1 → 23.1mm</text>
+<text x="718.0" y="838.0" font-size="12" fill="#6b7280" text-anchor="start">（这 3mm 是物理上必须的）</text>
+<line x1="100.0" y1="552.0" x2="100.0" y2="623.2" stroke="#a68a3f" stroke-width="1"/>
+<text x="90.0" y="587.6" font-size="12" fill="#a68a3f" text-anchor="end">定位板</text>
+</svg>
