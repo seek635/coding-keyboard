@@ -7,6 +7,7 @@ ClaudePad PCB 网表与接线图生成器
 
   pcb/netlist.json  机器可读网表
   pcb/netlist.md    人读网表（焊接对照表）
+  pcb/placement.csv 元件坐标表（供 KiCad 放置，改板用）
   pcb/wiring.svg    接线图（矢量，可打印放大）
   pcb/wiring.png    接线图（位图，快速预览）
 
@@ -312,6 +313,69 @@ def write_md(nl):
     return p
 
 
+def write_placement(nl):
+    """输出 KiCad 就绪的元件坐标表（CSV）
+
+    给「拿开源设计改板」用：布局不用量，直接照表放。
+
+    坐标系说明：
+      x_mm / y_mm   —— 板左下角为原点，Y 向上（与 params.scad 一致）
+      x_kicad / y_kicad —— KiCad 用左上角为原点、Y 向下，故 y_kicad = 板高 − y_mm
+    """
+    W = nl["pcb"]["width"]
+    H = nl["pcb"]["height"]
+
+    L = [
+        "# ClaudePad 元件坐标表（供 KiCad 放置用）",
+        "# 由 tools/gen_pcb.py 从 cad/lib/params.scad 生成 —— 勿手改",
+        f"# 板子外形 {W} × {H} mm，厚 {nl['pcb']['thickness']} mm",
+        "#",
+        "# 坐标系：板左下角为原点",
+        "#   x_mm / y_mm        本设计坐标系（Y 向上）",
+        "#   x_kicad / y_kicad  KiCad 坐标系（Y 向下），y_kicad = 板高 − y_mm",
+        "#",
+        "# 轴体旋转角：Choc 轴体封装默认 0°，本设计全部正向放置",
+        "",
+        "ref,type,label,matrix,x_mm,y_mm,x_kicad,y_kicad,rotation,note",
+    ]
+
+    sw_n = 0
+    for k in sorted(nl["keys"], key=lambda x: (x["row"], x["col"])):
+        positions = k.get("pcb_positions") or []
+        if not positions:
+            L.append(f",toggle,{k['label']},ROW{k['row']}xCOL{k['col']},,,,,,"
+                     "SPDT 拨动开关；位置见外壳右壁，不在主矩阵区")
+            continue
+        multi = len(positions) > 1
+        for i, (x, y) in enumerate(positions):
+            sw_n += 1
+            ref = f"SW{sw_n}"
+            note = f"{k['label']}"
+            if multi:
+                note += f"（{i+1}/{len(positions)} 并联到同一矩阵点）"
+            L.append(f"{ref},switch,{k['label']},ROW{k['row']}xCOL{k['col']},"
+                     f"{x:.2f},{y:.2f},{x:.2f},{H - y:.2f},0,{note}")
+
+    L.append("")
+    L.append("# 二极管：型号 1N4148，阳极接列线、阴极接行线（col2row）")
+    L.append("# 建议放在对应轴体附近，具体位置布线时确定；下表给的是「轴体正上方 8mm」的建议位")
+    L.append("ref,type,matrix,suggest_x_mm,suggest_y_mm,note")
+    d_n = 0
+    for k in sorted(nl["keys"], key=lambda x: (x["row"], x["col"])):
+        positions = k.get("pcb_positions") or []
+        if not positions:
+            continue
+        d_n += 1
+        x, y = positions[0]
+        L.append(f"D{d_n},diode,ROW{k['row']}xCOL{k['col']},{x:.2f},{y - 8.0:.2f},"
+                 f"{k['label']}；阳极→COL{k['col']}，阴极→ROW{k['row']}")
+
+    p = os.path.join(OUT, "placement.csv")
+    with open(p, "w", encoding="utf-8", newline="") as f:
+        f.write("\n".join(L) + "\n")
+    return p
+
+
 def main():
     nl = build()
     os.makedirs(OUT, exist_ok=True)
@@ -348,7 +412,7 @@ def main():
 
     # 生成文件
     c = draw_wiring(nl)
-    files = [write_json(nl), write_md(nl)]
+    files = [write_json(nl), write_md(nl), write_placement(nl)]
     svg_p = os.path.join(OUT, "wiring.svg")
     with open(svg_p, "w", encoding="utf-8") as f:
         f.write(render_svg(c))

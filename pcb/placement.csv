@@ -1,0 +1,41 @@
+# ClaudePad 元件坐标表（供 KiCad 放置用）
+# 由 tools/gen_pcb.py 从 cad/lib/params.scad 生成 —— 勿手改
+# 板子外形 86.0 × 50.0 mm，厚 1.6 mm
+#
+# 坐标系：板左下角为原点
+#   x_mm / y_mm        本设计坐标系（Y 向上）
+#   x_kicad / y_kicad  KiCad 坐标系（Y 向下），y_kicad = 板高 − y_mm
+#
+# 轴体旋转角：Choc 轴体封装默认 0°，本设计全部正向放置
+
+ref,type,label,matrix,x_mm,y_mm,x_kicad,y_kicad,rotation,note
+SW1,switch,PERM,ROW1xCOL1,7.00,7.00,7.00,43.00,0,PERM
+SW2,switch,UP,ROW1xCOL2,25.00,7.00,25.00,43.00,0,UP
+SW3,switch,MODEL,ROW1xCOL3,43.00,7.00,43.00,43.00,0,MODEL
+SW4,switch,CMD,ROW1xCOL4,61.00,7.00,61.00,43.00,0,CMD
+SW5,switch,STOP,ROW1xCOL5,79.00,7.00,79.00,43.00,0,STOP
+,toggle,APPROVE,ROW1xCOL6,,,,,,SPDT 拨动开关；位置见外壳右壁，不在主矩阵区
+SW6,switch,LEFT,ROW2xCOL1,7.00,25.00,7.00,25.00,0,LEFT
+SW7,switch,DOWN,ROW2xCOL2,25.00,25.00,25.00,25.00,0,DOWN
+SW8,switch,RIGHT,ROW2xCOL3,43.00,25.00,43.00,25.00,0,RIGHT
+SW9,switch,ENTER,ROW2xCOL4,61.00,25.00,61.00,25.00,0,ENTER（1/2 并联到同一矩阵点）
+SW10,switch,ENTER,ROW2xCOL4,79.00,25.00,79.00,25.00,0,ENTER（2/2 并联到同一矩阵点）
+SW11,switch,SPACE,ROW3xCOL1,7.00,43.00,7.00,7.00,0,SPACE（1/3 并联到同一矩阵点）
+SW12,switch,SPACE,ROW3xCOL1,34.00,43.00,34.00,7.00,0,SPACE（2/3 并联到同一矩阵点）
+SW13,switch,SPACE,ROW3xCOL1,61.00,43.00,61.00,7.00,0,SPACE（3/3 并联到同一矩阵点）
+SW14,switch,VOICE,ROW3xCOL5,79.00,43.00,79.00,7.00,0,VOICE
+
+# 二极管：型号 1N4148，阳极接列线、阴极接行线（col2row）
+# 建议放在对应轴体附近，具体位置布线时确定；下表给的是「轴体正上方 8mm」的建议位
+ref,type,matrix,suggest_x_mm,suggest_y_mm,note
+D1,diode,ROW1xCOL1,7.00,-1.00,PERM；阳极→COL1，阴极→ROW1
+D2,diode,ROW1xCOL2,25.00,-1.00,UP；阳极→COL2，阴极→ROW1
+D3,diode,ROW1xCOL3,43.00,-1.00,MODEL；阳极→COL3，阴极→ROW1
+D4,diode,ROW1xCOL4,61.00,-1.00,CMD；阳极→COL4，阴极→ROW1
+D5,diode,ROW1xCOL5,79.00,-1.00,STOP；阳极→COL5，阴极→ROW1
+D6,diode,ROW2xCOL1,7.00,17.00,LEFT；阳极→COL1，阴极→ROW2
+D7,diode,ROW2xCOL2,25.00,17.00,DOWN；阳极→COL2，阴极→ROW2
+D8,diode,ROW2xCOL3,43.00,17.00,RIGHT；阳极→COL3，阴极→ROW2
+D9,diode,ROW2xCOL4,61.00,17.00,ENTER；阳极→COL4，阴极→ROW2
+D10,diode,ROW3xCOL1,7.00,35.00,SPACE；阳极→COL1，阴极→ROW3
+D11,diode,ROW3xCOL5,79.00,35.00,VOICE；阳极→COL5，阴极→ROW3
