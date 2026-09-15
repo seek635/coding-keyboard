@@ -1,0 +1,8 @@
+if SHIELD_CLAUDEPAD
+
+# 蓝牙设备名（连接时显示的名字）
+# 注意：必须少于 16 个字符，否则截断
+config ZMK_KEYBOARD_NAME
+    default "ClaudePad"
+
+endif

@@ -1,0 +1,86 @@
+/*
+ * ClaudePad — ZMK shield 定义（硬件层）
+ * ---------------------------------------------------------------------------
+ * 键盘：三行五列 11 键 + 1 个侧边审批拨杆
+ * 主控：nice!nano v2（nRF52840，Pro Micro 引脚兼容）
+ *
+ * ⚠️ 引脚分配必须与实际 PCB 走线一致！改这里之前先确认 PCB。
+ *    本项目 CAD 只定义了「外壳/定位板」，PCB 尚未设计，所以下面是
+ *    一套建议分配 —— 打板前请核对，打板后如需调整改此文件即可。
+ */
+
+#include <dt-bindings/zmk/matrix_transform.h>
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,physical-layout = &physical_layout0;
+    };
+
+    /*
+     * 键盘扫描矩阵
+     * -----------------------------------------------------------------------
+     * 电气上是 3 行 × 6 列，共 18 个交点，实际用到 12 个：
+     *
+     *   行1: 列1..列6   全部使用（列6 = 审批拨杆）
+     *   行2: 列1..列4   列5、列6 未使用
+     *   行3: 列1、列5   列2、列3、列4、列6 未使用
+     *
+     * 大键的并联接法（重要）：
+     *   · 回车 2u —— 定位板上开 2 个轴孔，两个轴体都接到 (行2,列4)
+     *   · 空格 4u —— 定位板上开 3 个轴孔，三个轴体都接到 (行3,列1)
+     *   即：大键的多个轴体在电气上并联，任一轴触发即响应。
+     *
+     * 二极管方向：col2row（列线接二极管正极 → 行线）
+     *   ⚠️ 审批拨杆是拨动开关不是轴体，建议也串一只 1N4148 防鬼影。
+     */
+    kscan0: kscan0 {
+        compatible = "zmk,kscan-gpio-matrix";
+        diode-direction = "col2row";
+        wakeup-source;
+
+        row-gpios
+            = <&pro_micro 4 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&pro_micro 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            , <&pro_micro 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>
+            ;
+
+        col-gpios
+            = <&pro_micro 7  GPIO_ACTIVE_HIGH>
+            , <&pro_micro 8  GPIO_ACTIVE_HIGH>
+            , <&pro_micro 9  GPIO_ACTIVE_HIGH>
+            , <&pro_micro 10 GPIO_ACTIVE_HIGH>
+            , <&pro_micro 16 GPIO_ACTIVE_HIGH>
+            , <&pro_micro 14 GPIO_ACTIVE_HIGH>
+            ;
+    };
+
+    /*
+     * 矩阵变换：把 (行,列) 映射成「键位序号」
+     * -----------------------------------------------------------------------
+     * map 的顺序 = 键位序号 0,1,2,...，必须与 keymap 里 bindings 的顺序
+     * 完全一致（都是从左到右、从上到下）。
+     *
+     * 键位序号对照（共 12 个）：
+     *   0  访问等级   1  ↑      2  模型     3  命令行   4  停止    5  审批拨杆
+     *   6  ←         7  ↓      8  →        9  回车
+     *   10 空格      11 语音
+     */
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <6>;
+        rows = <3>;
+        map = <
+            RC(0,0) RC(0,1) RC(0,2) RC(0,3) RC(0,4) RC(0,5)
+            RC(1,0) RC(1,1) RC(1,2) RC(1,3)
+            RC(2,0) RC(2,4)
+        >;
+    };
+
+    physical_layout0: physical_layout_0 {
+        compatible = "zmk,physical-layout";
+        display-name = "ClaudePad";
+        kscan = <&kscan0>;
+        transform = <&default_transform>;
+    };
+};

@@ -1,0 +1,15 @@
+# ZMK 上游依赖
+# -----------------------------------------------------------------------------
+# 版本锁定在稳定的 tag 上，避免上游改动导致构建失败。
+# 想升级时改 revision 即可。
+manifest:
+  remotes:
+    - name: zmkfirmware
+      url-base: https://github.com/zmkfirmware
+  projects:
+    - name: zmk
+      remote: zmkfirmware
+      revision: v0.1.0
+      import: app/west.yml
+  self:
+    path: config
