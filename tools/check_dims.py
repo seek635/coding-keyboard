@@ -253,10 +253,13 @@ print(f"  轴体宽            : {f(SW_BODY_W)} mm")
 print(f"  轴体间净空隙      : {f(sw_gap)} mm（= 间距 {f(P['PITCH'])} − 轴体宽 {f(SW_BODY_W)}）")
 print(f"  支撑台直径        : {f(sup_d)} mm")
 
-# 第一个轴体中心（PCB 坐标系）= (PLATE_BORDER + PITCH/2) − PCB_X
-first = P["PLATE_BORDER"] + P["PITCH"] / 2 - (P["PLATE_W"] - P["PCB_W"]) / 2
-valid_x = {round(first + P["PITCH"] / 2 + i * P["PITCH"], 2) for i in range(4)}
-valid_y = {round(first + P["PITCH"] / 2 + i * P["PITCH"], 2) for i in range(2)}
+# 第一个轴体中心（PCB 坐标系）
+# ★ 2026-09-16 修 bug：原来 x 和 y 都用了 x 方向的偏移（PCB_X）。
+#   当 PCB_X == PCB_Y == 8 时巧合正确；PCB 加宽后 PCB_X 变成 2，y 检查就误报了。
+first_x = P["PLATE_BORDER"] + P["PITCH"] / 2 - (P["PLATE_W"] - P["PCB_W"]) / 2
+first_y = P["PLATE_BORDER"] + P["PITCH"] / 2 - (P["PLATE_H"] - P["PCB_H"]) / 2
+valid_x = {round(first_x + P["PITCH"] / 2 + i * P["PITCH"], 2) for i in range(4)}
+valid_y = {round(first_y + P["PITCH"] / 2 + i * P["PITCH"], 2) for i in range(2)}
 print(f"  合法的空隙中心 x  : {sorted(valid_x)}")
 print(f"  合法的空隙中心 y  : {sorted(valid_y)}")
 for name, v in [("X1", P["PCB_SUPPORT_X1"]), ("X2", P["PCB_SUPPORT_X2"])]:

@@ -16,11 +16,14 @@ ClaudePad PCB 网表与接线图生成器
 
 关键数据（已交叉验证两个独立开源封装库，坐标完全一致）：
 
-  Kailh Choc V1 (PG1350) PCB 焊盘坐标（原点 = 轴芯中心）：
-    电气引脚 1   (0, 5.9)    孔径 1.27
-    电气引脚 2   (-5, 3.8)   孔径 1.27
-    轴芯中心孔   (0, 0)      孔径 3.429  （非金属化）
-    侧固定孔     (±5.5, 0)   孔径 1.7018 （非金属化）
+  Kailh Choc **V2** (PG1353) PCB 焊盘坐标（原点 = 轴芯中心）：
+    电气引脚 1   (0, 5.9)    孔径 1.27      ← 与 V1 相同
+    电气引脚 2   (-5, 3.8)   孔径 1.27      ← 与 V1 相同
+    轴芯中心孔   (0, 0)      孔径 5.0       ← ★ V2 加大（V1 是 3.429）
+    侧固定孔     (±5.5, 0)   孔径 1.7018    ← ★ V2 取消 fixing pins，此孔无用但保留不影响
+
+  ★ 2026-09-16 换用 Choc V2：键程 3.0 → 3.2；轴心由 3.4mm 矩形改为 5mm MX 十字。
+    【来源】themk.org PG1353 词条 + mwlabs.be 实装日志（两处独立印证）
 
   二极管方向 col2row：阳极接列、阴极接行，电流 列 → 行
     列 = 输出驱动（GPIO_ACTIVE_HIGH）
@@ -47,10 +50,12 @@ ROW_PINS = ["D4", "D5", "D6"]
 COL_PINS = ["D7", "D8", "D9", "D10", "D16", "D14"]
 APPROVE_PIN = "D14"
 
-# ---- Choc V1 PCB 焊盘（原点 = 轴芯中心，mm）---------------------------------
-CHOC_PAD1 = (0.0, 5.9)
-CHOC_PAD2 = (-5.0, 3.8)
+# ---- Choc V2 (PG1353) PCB 焊盘（原点 = 轴芯中心，mm）------------------------
+CHOC_PAD1 = (0.0, 5.9)          # 与 V1 相同
+CHOC_PAD2 = (-5.0, 3.8)         # 与 V1 相同
 CHOC_PAD_DRILL = 1.27
+CHOC_CENTER_D = 5.00            # ★ V2：中心孔 5.0（V1 是 3.429）
+CHOC_SIDE_D = 1.7018            # V2 已取消 fixing pins，此值仅供钻孔参考
 
 PITCH = P["PITCH"]
 BORDER = P["PLATE_BORDER"]
@@ -117,9 +122,10 @@ def build():
         "diode_direction": "col2row",
         "diode_rule": "阳极接列线，阴极接行线（电流 列 → 行）",
         "switch_footprint": {
-            "name": "Kailh Choc V1 (PG1350)",
+            "name": "Kailh Choc V2 (PG1353)",
             "pad1": CHOC_PAD1, "pad2": CHOC_PAD2,
-            "center_hole": (0.0, 0.0), "side_holes": [(-5.5, 0.0), (5.5, 0.0)],
+            "center_hole": (0.0, 0.0), "center_hole_d": CHOC_CENTER_D,
+            "side_holes": [(-5.5, 0.0), (5.5, 0.0)], "side_hole_d": CHOC_SIDE_D,
             "pad_drill_mm": CHOC_PAD_DRILL, "pad_size_mm": 2.0,
         },
         "rows": rows, "cols": cols, "keys": keys,
@@ -292,8 +298,8 @@ def write_md(nl):
     A("|---|---|---|---|")
     A(f"| 电气引脚 1 | ({CHOC_PAD1[0]}, {CHOC_PAD1[1]}) | {CHOC_PAD_DRILL} | 金属化 |")
     A(f"| 电气引脚 2 | ({CHOC_PAD2[0]}, {CHOC_PAD2[1]}) | {CHOC_PAD_DRILL} | 金属化 |")
-    A("| 轴芯中心孔 | (0, 0) | 3.429 | 非金属化 |")
-    A("| 侧固定孔 ×2 | (±5.5, 0) | 1.7018 | 非金属化 |")
+    A("| 轴芯中心孔 | (0, 0) | 5.0 | 非金属化（V2 加大，V1 是 3.429）|")
+    A("| 侧固定孔 ×2 | (±5.5, 0) | 1.7018 | 非金属化（V2 已取消 fixing pins，可省略）|")
     A("")
     A("> 两电气引脚间距 = √(5² + 2.1²) = **5.42 mm**\n")
 

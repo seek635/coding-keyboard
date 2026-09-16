@@ -26,10 +26,10 @@ module rrect(w, h, r) {
 // ---------- 十字榫槽（从 z=0 向上开，深 CAP_STEM_DEPTH）-------------------
 module cross_stem_socket() {
     union() {
-        translate([-CAP_STEM_W / 2, -CAP_STEM_GAP / 2, 0])
-            cube([CAP_STEM_W, CAP_STEM_GAP, CAP_STEM_DEPTH]);
-        translate([-CAP_STEM_GAP / 2, -CAP_STEM_W / 2, 0])
-            cube([CAP_STEM_GAP, CAP_STEM_W, CAP_STEM_DEPTH]);
+        translate([-CAP_CROSS_L / 2, -CAP_CROSS_W / 2, 0])
+            cube([CAP_CROSS_L, CAP_CROSS_W, CAP_STEM_DEPTH]);
+        translate([-CAP_CROSS_W / 2, -CAP_CROSS_L / 2, 0])
+            cube([CAP_CROSS_W, CAP_CROSS_L, CAP_STEM_DEPTH]);
     }
 }
 
@@ -65,7 +65,7 @@ module cap_shell(u) {
 module stem_boss() {
     h = CAP_H - CAP_TOP_T;
     difference() {
-        cylinder(d = CAP_STEM_W * 2 + 2.0, h = h);
+        cylinder(d = CAP_STEM_BOSS_D, h = h);
         translate([0, 0, -0.5]) cross_stem_socket();
     }
 }
@@ -109,7 +109,7 @@ if (keycap_mode == "1u") {
 }
 
 // ---------- 尺寸自检 -------------------------------------------------------
-echo(str("键帽：高 ", CAP_H, " ｜ 1u 外宽 ", PITCH - 0.40, " ｜ 榫槽 ", CAP_STEM_GAP, "×", CAP_STEM_DEPTH));
+echo(str("键帽：高 ", CAP_H, " ｜ 1u 外宽 ", PITCH - 0.40, " ｜ MX 十字榫槽 ", CAP_CROSS_L, "×", CAP_CROSS_W, " 深 ", CAP_STEM_DEPTH));
 echo(str("装配校验：轴芯高出定位板 ", SWITCH_TIP_ABOVE_PLATE,
          " ≤ 间隙 ", CAP_GAP, " + 榫槽深 ", CAP_STEM_DEPTH, " = ", CAP_GAP + CAP_STEM_DEPTH));
 
