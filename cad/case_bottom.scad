@@ -22,14 +22,17 @@ CASE_D = CASE_INNER_D + CASE_WALL * 2;          // = 71.10
 // 定位板底面高度（= 螺丝柱顶面 = 底板上表面 + 内腔高度）
 PLATE_BOTTOM_Z = CASE_BOTTOM_T + CASE_INNER_H;  // = 13.60
 PCB_TOP_Z = CASE_BOTTOM_T + PCB_STANDOFF_H + PCB_T;   // = 8.60
+PCB_BOTTOM_Z = PCB_TOP_Z - PCB_T;                     // = 7.00（主控安装面）
 
 // 拨杆位置（右壁）
 SW_Y = 16.0;                                    // 拨杆中心纵向位置
 SW_Z = CASE_BOTTOM_T + CASE_INNER_H * 0.55;     // 拨杆中心高度
 
-// 主控位置（PCB 右上方）
-NANO_X = PCB_X + CASE_WALL + PCB_W - 3.0 - NANO_W;    // 绝对坐标
-NANO_Y = PCB_Y + CASE_WALL + PCB_H - 3.0 - NANO_L;
+// 主控位置（PCB 背面右侧）
+// ★ 2026-09-16 方案 A：主控从 PCB 正面移到背面（下表面）
+//   PCB 坐标系原点在外壳坐标 (PCB_X + CASE_WALL, PCB_Y + CASE_WALL)
+NANO_X = PCB_X + CASE_WALL + NANO_POS_X;    // 绝对坐标
+NANO_Y = PCB_Y + CASE_WALL + NANO_POS_Y;
 
 // ---------- 通用工具 ------------------------------------------------------
 module rounded_box(w, h, d, r) {
@@ -96,10 +99,15 @@ module pcb_supports() {
 }
 
 // ---------- 电池仓 --------------------------------------------------------
-// 电池贴在底板中央（PCB 正下方），四周限位挡墙防止滑动
+// 电池用双面胶贴在底板上（PCB 正下方），四周限位挡墙防止滑动
 // 挡墙高度受 PCB_STANDOFF_H 限制，不能顶到 PCB
-BATT_X = CASE_WALL + (CASE_INNER_W - BATT_W) / 2;
-BATT_Y = CASE_WALL + (CASE_INNER_D - BATT_L) / 2;
+//
+// ★ 2026-09-16 改：电池从「居中」改为「贴左壁」
+//   原因：主控移到 PCB 背面右侧后，支撑台必须占用中间的 x=34/52 两个位置，
+//         而居中的电池（PCB 坐标 x 28.15~58.15）正好盖住它们。
+//   结果：电池 PCB 坐标 x 0~30，与支撑台（32~36 与 50~54）互不干涉。
+BATT_X = CASE_WALL;                                 // 贴内腔左壁（原为居中）
+BATT_Y = CASE_WALL + (CASE_INNER_D - BATT_L) / 2;   // 纵向仍居中
 BATT_WALL_H = PCB_STANDOFF_H - BATT_TAPE_T;      // = 4.4，正好不顶 PCB
 
 module battery_bay() {
@@ -126,14 +134,19 @@ module wire_channels() {
 }
 
 // ---------- 右壁：USB-C 开孔 ---------------------------------------------
-// 主控焊在 PCB 上，USB 口朝右壁，开口是「横长」的槽（宽 > 高）
+// 主控装在 PCB 背面（下表面），USB 口朝右壁，开口是「横长」的槽（宽 > 高）
+// ★ 2026-09-16 方案 A：开孔高度从「PCB 上表面上方」改到「PCB 下表面下方」
 //
 // ⚠️ 注意 rotate([0,90,0]) 之后：局部 X 轴 → 世界 Z 轴（垂直）
 //    所以要沿「局部 Y 轴」偏移，才能得到水平方向的槽。
+// 开孔高度随主控安装面自动切换（正面 / 背面）
+// 主控的 USB 口在板边缘，开孔中心取「PCB 表面 ± 1.80」
+USB_CUT_Z = NANO_ON_BACK ? PCB_BOTTOM_Z - 1.80 : PCB_TOP_Z + 1.80;
+
 module usb_cutout() {
     d = NANO_USB_H + NANO_USB_TOL;                       // 槽高
     off = NANO_USB_W + NANO_USB_TOL - d;                 // 槽宽 - 槽高
-    translate([CASE_W - CASE_WALL - 2, NANO_Y + NANO_L / 2, PCB_TOP_Z + 1.80])
+    translate([CASE_W - CASE_WALL - 2, NANO_Y + NANO_L / 2, USB_CUT_Z])
         rotate([0, 90, 0])
             hull() {
                 cylinder(d = d, h = CASE_WALL + 6);

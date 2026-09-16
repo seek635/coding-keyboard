@@ -49,7 +49,7 @@ def _strip_comments(t):
 
 
 def load(path=PARAMS):
-    """返回 {参数名: 数值}"""
+    """返回 {参数名: 数值或布尔}"""
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"找不到参数文件：{path}\n"
@@ -79,6 +79,8 @@ def load(path=PARAMS):
         "max": max, "min": min, "abs": abs,
         "floor": math.floor, "ceil": math.ceil,
         "sqrt": math.sqrt, "pow": pow, "round": round,
+        # OpenSCAD 的布尔字面量（Python 里是 True/False）
+        "true": True, "false": False,
     }
 
     for _ in range(len(raw) + 2):
@@ -88,7 +90,11 @@ def load(path=PARAMS):
                 continue
             try:
                 val = eval(expr, {"__builtins__": {}}, {**safe, **env})
-                if isinstance(val, (int, float)):
+                # 布尔要先判断 —— bool 是 int 的子类，会被下面的分支吞掉
+                if isinstance(val, bool):
+                    env[name] = val
+                    progress = True
+                elif isinstance(val, (int, float)):
                     env[name] = float(val)
                     progress = True
             except Exception:

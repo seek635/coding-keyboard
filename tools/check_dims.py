@@ -303,39 +303,69 @@ def _overlap(nx, ny):
     return tot
 
 
-# 主控当前设计位置（对应 case_bottom.scad 的 NANO_X / NANO_Y，PCB 坐标）
-NANO_X = PCB_W - 3.0 - NANO_W
-NANO_Y = PCB_H - 3.0 - NANO_L
-cur = _overlap(NANO_X, NANO_Y)
+# 主控安装面：方案 A（2026-09-16）后装在 PCB 背面（下表面）
+on_back = P.get("NANO_ON_BACK", False)
+NANO_X = P.get("NANO_POS_X", PCB_W - 3.0 - NANO_W)
+NANO_Y = P.get("NANO_POS_Y", PCB_H - 3.0 - NANO_L)
+CIW = P["PLATE_W"] + P["CASE_TOP_TOL"] * 2
+CID = P["PLATE_H"] + P["CASE_TOP_TOL"] * 2
 
 print(f"  板面       : {f(PCB_W)} × {f(PCB_H)} mm")
 print(f"  主控       : {f(NANO_W)} × {f(NANO_L)} mm（{f(P['NANO_H'])} 厚）")
 print(f"  轴体本体   : {f(SW_BODY_W)} mm 见方 × {len(sw_pos)} 个")
-print(f"  设计位置   : ({f(NANO_X)}, {f(NANO_Y)})  → 与轴体重叠 {f(cur)} mm²")
+print(f"  安装面     : {'PCB 背面（下表面）' if on_back else 'PCB 正面（上表面）'}")
+print(f"  设计位置   : ({f(NANO_X)}, {f(NANO_Y)})  [PCB 坐标]")
 
-chk("主控在板面上不与轴体重叠", cur == 0,
-    f"重叠 {f(cur)} mm²",
-    "主控必须移到 PCB 背面，或改用更小的主控模块（见 docs/PCB设计规格书.md §14）")
+if not on_back:
+    # ---- 正面：与轴体争板面 ----
+    cur = _overlap(NANO_X, NANO_Y)
+    print(f"  与轴体重叠 : {f(cur)} mm²")
+    chk("主控在板面上不与轴体重叠", cur == 0,
+        f"重叠 {f(cur)} mm²",
+        "主控必须移到 PCB 背面，或改用更小的主控模块（见 docs/PCB设计规格书.md §14）")
 
-# 穷举板面，看还有没有别的位置
-valid = 0
-_x = 0.0
-while _x <= PCB_W - NANO_W + 0.01:
-    _y = 0.0
-    while _y <= PCB_H - NANO_L + 0.01:
-        if _overlap(round(_x, 1), round(_y, 1)) == 0:
-            valid += 1
-        _y += 0.5
-    _x += 0.5
+    # 穷举板面，看还有没有别的位置
+    valid = 0
+    _x = 0.0
+    while _x <= PCB_W - NANO_W + 0.01:
+        _y = 0.0
+        while _y <= PCB_H - NANO_L + 0.01:
+            if _overlap(round(_x, 1), round(_y, 1)) == 0:
+                valid += 1
+            _y += 0.5
+        _x += 0.5
+    chk("板面上存在可放置主控的位置", valid > 0,
+        f"共 {valid} 个候选位（步长 0.5mm）",
+        "板面被轴体占满 —— 主控只能放 PCB 背面（需同步挪支撑台、下移 USB 开孔）")
+else:
+    # ---- 背面：与电池、支撑台共用同一层，必须互不干涉 ----
+    b_x0 = -P["PCB_X"]                              # 电池贴内腔左壁
+    b_y0 = (CID - P["BATT_L"]) / 2 - P["PCB_Y"]     # 纵向居中
+    b_x1, b_y1 = b_x0 + P["BATT_W"], b_y0 + P["BATT_L"]
+    _ox = max(0.0, min(b_x1, NANO_X + NANO_W) - max(b_x0, NANO_X))
+    _oy = max(0.0, min(b_y1, NANO_Y + NANO_L) - max(b_y0, NANO_Y))
+    batt_ov = _ox * _oy
+    print(f"  电池       : x {f(b_x0)}~{f(b_x1)}  y {f(b_y0)}~{f(b_y1)}  [PCB 坐标]")
+    chk("主控在背面不与电池重叠", batt_ov == 0,
+        f"重叠 {f(batt_ov)} mm²",
+        "电池需让位到另一侧，或改用更小的电池")
 
-chk("板面上存在可放置主控的位置", valid > 0,
-    f"共 {valid} 个候选位（步长 0.5mm）",
-    "板面被轴体占满 —— 主控只能放 PCB 背面（需同步挪支撑台、下移 USB 开孔）")
+    _r = P["PCB_SUPPORT_D"] / 2
+    sup_hit = []
+    for sx in (P["PCB_SUPPORT_X1"], P["PCB_SUPPORT_X2"]):
+        for sy in (P["PCB_SUPPORT_Y1"], P["PCB_SUPPORT_Y2"]):
+            if (sx + _r > NANO_X and sx - _r < NANO_X + NANO_W
+                    and sy + _r > NANO_Y and sy - _r < NANO_Y + NANO_L):
+                sup_hit.append(f"({f(sx)},{f(sy)})")
+    chk("主控在背面不与支撑台重叠", not sup_hit,
+        "无冲突" if not sup_hit else f"冲突 {len(sup_hit)} 个：{' '.join(sup_hit)}",
+        "支撑台必须挪到不被主控覆盖的轴体间隙中心")
 
 # 背面可行性：层高够不够
 back_ok = P["NANO_H"] <= P["PCB_STANDOFF_H"]
 chk("主控厚度能放进 PCB 下方层", back_ok,
-    f"{f(P['NANO_H'])} ≤ {f(P['PCB_STANDOFF_H'])} mm",
+    f"{f(P['NANO_H'])} ≤ {f(P['PCB_STANDOFF_H'])} mm"
+    f"（余 {f(P['PCB_STANDOFF_H'] - P['NANO_H'])}）",
     "改用更薄的主控或加高 PCB 支撑台")
 
 # ---- 汇总 -------------------------------------------------------------------
