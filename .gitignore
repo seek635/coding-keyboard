@@ -36,6 +36,5 @@ token
 .workbuddy-ai/
 
 # ---------- 构建产物 ----------
-# 技能打包件（由 skill-creator 生成，可重新打包）
-# 如需随仓库分发，注释掉下面这行
-# dist/*.zip
+# 技能打包件（由 skill-creator 生成，可重新打包，不入库）
+dist/
