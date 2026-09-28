@@ -2,7 +2,7 @@
 
 3D 打印用的参数化结构模型。**改尺寸只需改一个文件**：`lib/params.scad`
 
-整机 **107.10 × 71.10 × 20.10 mm**
+整机 **107.10 × 71.10 × 23.30 mm**
 
 ---
 
@@ -109,7 +109,7 @@ docs/
 ### 第 1 步：核参数（不需要装任何东西）
 
 ```bash
-python tools/check_dims.py       # 16 项设计规则
+python tools/check_dims.py       # 26 项设计规则
 python tools/lint_scad.py        # 语法、符号、死代码
 python tools/verify_geometry.py  # 孔位、对称性、键帽对位
 ```
@@ -124,7 +124,7 @@ python tools/verify_geometry.py  # 孔位、对称性、键帽对位
 - 螺丝柱撞穿轴孔
 - 拨杆螺母没有咬合长度
 - 轴芯太长捅穿键帽顶面
-- 主控放不进 PCB 与定位板之间
+- 主控放正面会压到轴体（板面被 14 个轴体占满）
 - 电池厚度超过可用空间
 - 空格单轴支撑挠度超标
 
@@ -273,7 +273,7 @@ openscad keycap.scad
 |---|---|---|
 | **轴体卡扣位置**（最重要） | `SWITCH_PLATE_GAP` | `5.00` |
 | 轴体装不进 / 太松 | `SWITCH_CUTOUT_TOL` | `0.10` |
-| 键帽榫槽太紧 / 太松 | `CAP_STEM_GAP` | `0.95` |
+| 键帽榫槽太紧 / 太松 | `CAP_CROSS_W` | `1.30` |
 | 键距 | `PITCH` | `18.0` |
 | 键盘更薄 | `PCB_STANDOFF_H` | `5.00` |
 | 换拨杆开关 | `SW_*` 系列 | 见文件 |
@@ -301,9 +301,12 @@ python tools/check_dims.py && python tools/lint_scad.py && python tools/verify_g
 
 ### 一个必须知道的耦合
 
-**「PCB 到定位板的间隙」同时决定轴体卡扣位置和主控可用高度** —— 主控就装在这 5.0mm 里。
+**PCB 下方那 5.0mm 要同时容下电池和主控** —— 两者平面错开到两侧（电池贴左壁、主控贴右壁），
+但层高由**较厚的电池**决定：胶 0.6 + 电池 4.0 = 4.6mm。想改薄键盘先确认电池装得下。
+`check_dims.py` 会校验这一点。
 
-所以这个值不能随意调小：小于 3.7mm 主控就放不下。`check_dims.py` 会校验这一点。
+> 主控早先装在 PCB **正面**，那时这条耦合是「轴体卡扣间隙 = 主控净空」；
+> 因为 14 个轴体占满板面，主控已改到背面，耦合随之转移。详见 `docs/PCB设计规格书.md` §14。
 
 ### 空格为什么要 3 个轴
 
@@ -324,12 +327,22 @@ python tools/check_dims.py && python tools/lint_scad.py && python tools/verify_g
 
 ## 关于 STL 文件
 
-本仓库**不含预生成的 STL**，原因有二：
+本仓库**包含**已导出的 6 个 STL（`cad/output/*.stl`），这样**只装 Python 也能用**：
+查看器、切片软件都能直接吃，不需要为了看一眼模型去装 OpenSCAD。
 
-1. STL 是二进制大文件，参数一改就作废，不如源码干净
-2. 你的打印机公差、材料、喷嘴直径都可能不同，**应该由你在本地导出**
+⚠️ **但要注意它们会过期**：`params.scad` 一改，仓库里的 STL 就是旧的快照。
+所以：
 
-导出是一次性的：装好 OpenSCAD 后跑 `python tools/export_stl.py`，几秒钟的事。
+- **只是想打印** → 直接用仓库里的，但先确认没改过参数（`git log` 看 `params.scad` 的改动时间）
+- **改过参数** → 必须重新导出，别拿旧 STL 去打印
+
+```bash
+python tools/export_stl.py     # 需要 OpenSCAD
+python tools/verify_stl.py     # 校验包围盒与水密性
+```
+
+> 之所以强调这点：展示层（预览图、查看器、STL）都必须是**生成物**而不是手抄的副本 ——
+> 副本会「自信地展示错误信息」，比没有更糟。见根目录 `README.md` 的「单一数据源」。
 
 ---
 

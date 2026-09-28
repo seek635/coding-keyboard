@@ -20,6 +20,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scad_params import load, load_keymap     # noqa: E402
+from console_utf8 import enable               # noqa: E402
+
+enable()
 
 P = load()
 KM = load_keymap()
@@ -180,6 +183,27 @@ chk("已为拨杆本体预留 PCB 缺口",
     f"缺口深 {f(P['PCB_NOTCH_D'])} mm",
     "缺口太小会导致拨杆本体压到 PCB")
 
+# ★ 2026-09-26 新增：缺口纵向区间校验（spec §5.2 阻塞项，此前从未校验过）
+#   缺口 y 区间 [Y0, Y1]（PCB 坐标），固定值来自 params.scad。
+#   校验 1：区间必须落在板内且覆盖拨杆中心（PCB y = SW_Y − PCB_Y − CASE_WALL = 5.6）
+#   校验 2：缺口内（x ≥ PCB_W − NOTCH_D）不得有行1 电气焊盘（PTH）——
+#           STOP(85,7) 电气焊盘最右缘 = 85 − 3.8 + 焊盘半径 1.0 = 82.2
+ny0, ny1 = P["PCB_NOTCH_Y0"], P["PCB_NOTCH_Y1"]
+sw_y_pcb = 16.0 - P["PCB_Y"] - P["PCB_WALL"] if "PCB_WALL" in P else 16.0 - P["PCB_Y"] - 2.40
+chk("缺口纵向区间在板内",
+    0 <= ny0 < ny1 <= P["PCB_H"],
+    f"缺口 y ∈ [{f(ny0)}, {f(ny1)}]",
+    "缺口超出板边说明 PCB_NOTCH_Y0/Y1 配置错误")
+chk("缺口覆盖拨杆中心（PCB y=5.6）",
+    ny0 <= sw_y_pcb <= ny1,
+    f"拨杆中心 y = {f(sw_y_pcb)} 在缺口区间内",
+    "缺口没对准拨杆 → 拨杆本体压板")
+stop_pad_right = 85.0 - 3.80 + 1.00   # STOP 电气脚1 x 偏移 −3.80，焊盘半径 1.0
+chk("缺口不压行1 电气焊盘",
+    (P["PCB_W"] - P["PCB_NOTCH_D"]) - stop_pad_right >= 2.0,
+    f"焊盘右缘 {f(stop_pad_right)} → 缺口左缘间隙 {f(P['PCB_W'] - P['PCB_NOTCH_D'] - stop_pad_right)} mm",
+    "电气焊盘落入缺口 → 焊盘悬空、无法焊接")
+
 # ---- 6. 电池 ----------------------------------------------------------------
 print("\n【电池空间】")
 avail = P["PCB_STANDOFF_H"]                      # PCB 下方净高
@@ -201,17 +225,27 @@ chk("电池与 PCB 在平面内不重叠（电池走 PCB 正下方）",
     "占比过高会导致元器件没地方放")
 
 # ---- 7. 主控在腔内的净空 ----------------------------------------------------
-# ★ 重要耦合：PCB 上表面到定位板下表面的空间 = SWITCH_PLATE_GAP
-#   也就是说「轴体卡扣间隙」和「主控可用高度」是同一个尺寸，必须同时满足
-print("\n【主控净空】（注意：这个空间 = SWITCH_PLATE_GAP，与轴体共用）")
-space_above_pcb = P["SWITCH_PLATE_GAP"]
-print(f"  PCB 上表面到定位板下表面 : {f(space_above_pcb)} mm")
+# ★ 主控的可用高度取决于它装在哪一面：
+#     正面 → 与轴体共用 SWITCH_PLATE_GAP（PCB 上表面 ↔ 定位板下表面）
+#     背面 → 与电池共用 PCB_STANDOFF_H（PCB 下表面 ↔ 底板上表面）
+#   板面被 14 个轴体占满，主控实际装在背面（NANO_ON_BACK），所以要按背面算。
+on_back = P.get("NANO_ON_BACK", False)
+print("\n【主控净空】")
+if on_back:
+    space_for_nano = P["PCB_STANDOFF_H"]
+    print("  主控装在 PCB 背面 —— 与电池共用下方这一层")
+    print(f"  PCB 下表面到 底板上表面 : {f(space_for_nano)} mm")
+else:
+    space_for_nano = P["SWITCH_PLATE_GAP"]
+    print("  主控装在 PCB 正面 —— 与轴体共用 SWITCH_PLATE_GAP")
+    print(f"  PCB 上表面到 定位板下表面 : {f(space_for_nano)} mm")
 print(f"  主控板+元件高度          : {f(P['NANO_H'])} mm（直焊方案，不用普通排母）")
-print(f"  余量                     : {f(space_above_pcb - P['NANO_H'])} mm")
-chk("轴体间隙同时满足主控净空",
-    space_above_pcb >= P["NANO_H"] + 0.30,
-    f"{f(space_above_pcb)} ≥ {f(P['NANO_H'] + 0.30)}",
-    "间隙太小 → 主控放不下。必须把主控改成 PCB 底面安装，或加大间隙并重验轴体")
+print(f"  余量                     : {f(space_for_nano - P['NANO_H'])} mm")
+chk("主控净空满足直焊高度",
+    space_for_nano >= P["NANO_H"] + 0.30,
+    f"{f(space_for_nano)} ≥ {f(P['NANO_H'] + 0.30)}",
+    "净空太小 → 主控放不下。正面放不下就改到 PCB 背面，"
+    "但下方那一层要和电池错开（见第 11 节）")
 
 # ---- 8. 空格大键挠度 --------------------------------------------------------
 # 按「无加强筋」的最坏情况估算（只有顶面承力），保守
@@ -247,6 +281,10 @@ chk("轴孔之间有足够筋宽", gap >= 3.0,
 # 支撑台必须落在空隙中央，且直径 < 空隙宽度，否则会顶住轴体的塑料脚。
 print("\n【PCB 支撑台与轴体脚的干涉】")
 SW_BODY_W = 13.50                     # Choc 轴体宽（比定位板孔 13.9 小）
+# ⚠️ 13.50 是估算值。凯华官方图标注外形 15×15、底座 13.95×13.95 ——
+#    若按 13.95 算，轴体间净空隙 = 18 − 13.95 = 4.05mm，支撑台 ⌀4.00 余量只剩 0.05mm/边。
+#    实际约束是「支撑台圆心到轴体本体**拐角**的距离」（当前 2.97mm > 半径 2.0），比间隙宽松。
+#    但支撑台直径这个检查是保守估算，**待实物复量轴体宽后再校**。
 sw_gap = P["PITCH"] - SW_BODY_W       # 轴体之间的净空隙
 sup_d = P["PCB_SUPPORT_D"]
 print(f"  轴体宽            : {f(SW_BODY_W)} mm")
@@ -274,7 +312,8 @@ chk("支撑台直径小于轴体间隙", sup_d < sw_gap,
 
 # ---- 11. 主控必须放得下（板面被轴体占满就会放不下）--------------------------
 # 这是「设计能做出来」与「做不出来」的分界线：
-# 14 个轴体本体几乎占满 86×50 的板面，主控（17.8×33）可能根本无处可放。
+# 14 个轴体本体几乎占满板面（86×50 时代是 0 个可放位置，加宽到 98×50 也有轴体遮挡），
+# 主控（17.78×33）放正面必然压到轴体。
 print("\n【主控放置可行性】")
 NANO_W, NANO_L = P["NANO_W"], P["NANO_L"]
 PCB_W, PCB_H = P["PCB_W"], P["PCB_H"]
@@ -306,8 +345,7 @@ def _overlap(nx, ny):
     return tot
 
 
-# 主控安装面：方案 A（2026-09-16）后装在 PCB 背面（下表面）
-on_back = P.get("NANO_ON_BACK", False)
+# 主控安装面：方案 A（2026-09-16）后装在 PCB 背面（下表面）—— on_back 已在第 7 节取好
 NANO_X = P.get("NANO_POS_X", PCB_W - 3.0 - NANO_W)
 NANO_Y = P.get("NANO_POS_Y", PCB_H - 3.0 - NANO_L)
 CIW = P["PLATE_W"] + P["CASE_TOP_TOL"] * 2

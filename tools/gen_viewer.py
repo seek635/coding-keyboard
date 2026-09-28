@@ -28,6 +28,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scad_params import load, find_project_root      # noqa: E402
+from console_utf8 import enable                      # noqa: E402
+
+enable()
 
 ROOT = find_project_root()
 if not ROOT:

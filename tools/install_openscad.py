@@ -25,6 +25,11 @@ import urllib.error
 import urllib.request
 import zipfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from console_utf8 import enable     # noqa: E402
+
+enable()
+
 HOME = os.path.expanduser("~")
 DEST = os.path.join(HOME, "openscad-portable")
 ZIP = os.path.join(DEST, "openscad.zip")

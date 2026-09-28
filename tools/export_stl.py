@@ -17,6 +17,11 @@ import shutil
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from console_utf8 import enable     # noqa: E402
+
+enable()
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CAD = os.path.join(ROOT, "cad")
 OUT = os.path.join(CAD, "output")

@@ -18,6 +18,12 @@ OpenSCAD 的 `include` 会把被包含文件的定义并入同一命名空间，
 
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from console_utf8 import enable     # noqa: E402
+
+enable()
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CAD = os.path.join(ROOT, "cad")

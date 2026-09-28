@@ -24,6 +24,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scad_params import load, find_project_root     # noqa: E402
 from canvas import Canvas, render_svg, render_png, C_TEXT, C_MUTED   # noqa: E402
+from console_utf8 import enable                      # noqa: E402
+
+enable()
 
 ROOT = find_project_root() or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "docs")
@@ -40,6 +43,9 @@ CAP_H = P["CAP_H"]
 CAP_WALL = P["CAP_WALL"]
 TRAVEL = P["SWITCH_TRAVEL"]
 PITCH = P["PITCH"]
+TOTAL_H = P["TOTAL_H"]
+# 修正前（v0.2）的整机高度 —— 只用于图上「修 bug 前后」的对比，是历史值，不从 params 推导
+H_TOTAL_BEFORE = 20.10
 SKIRT = PITCH - 0.40
 HOLE = P["SWITCH_CUTOUT"]
 
@@ -140,10 +146,10 @@ def draw():
     c.text(bx + 18, 688, "这次的 bug", 14, "#b91c1c", "start", True)
     c.text(bx + 18, 714, "原来：间隙 0.30mm，键程需要 3.00mm", 12, "#4b5563")
     c.text(bx + 18, 734, "→ 按 0.3mm 就顶死，行程全废", 12, "#b91c1c")
-    c.text(bx + 18, 766, "修正后：间隙 3.30mm ≥ 键程 3.00mm", 12, "#4b5563")
-    c.text(bx + 18, 786, "→ 完整 3mm 行程可用", 12, "#0f6e56")
-    c.text(bx + 18, 818, "代价：整机高度 20.1 → 23.1mm", 12, "#6b7280")
-    c.text(bx + 18, 838, "（这 3mm 是物理上必须的）", 12, "#6b7280")
+    c.text(bx + 18, 766, f"修正后：间隙 {f(CAP_GAP)}mm ≥ 键程 {f(TRAVEL)}mm", 12, "#4b5563")
+    c.text(bx + 18, 786, f"→ 完整 {f(TRAVEL)}mm 行程可用", 12, "#0f6e56")
+    c.text(bx + 18, 818, f"代价：整机高度 {f(H_TOTAL_BEFORE)} → {f(TOTAL_H)}mm", 12, "#6b7280")
+    c.text(bx + 18, 838, f"（这 {f(TOTAL_H - H_TOTAL_BEFORE)}mm 是物理上必须的）", 12, "#6b7280")
 
     # ---- 定位板标注 ----
     c.line(CX - 330, plate_y - 8, CX - 330, plate_y + PLATE_T * SCALE_Z + 8, "#a68a3f", 1)

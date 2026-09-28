@@ -68,7 +68,7 @@
 
   <div id="panel">
     <h1>ClaudePad 三维结构</h1>
-    <div class="sub">三行五列 11 键 + 侧边审批拨杆<br><!--GEN:SIZE-->尺寸 107.10 × 71.10 × 23.10 mm<!--/GEN:SIZE--></div>
+    <div class="sub">三行五列 11 键 + 侧边审批拨杆<br><!--GEN:SIZE-->尺寸 107.10 × 71.10 × 23.30 mm<!--/GEN:SIZE--></div>
 
     <div class="group">
       <label class="title">零件显示</label>
@@ -90,8 +90,8 @@
       <label class="title">垂直尺寸链</label>
       <div class="spec">
         <!--GEN:CHAIN-->
-        <span class="k">键帽顶面</span> <b>z = 23.10</b><br>
-        <span class="k">键帽底面</span> <b>z = 18.10</b><br>
+        <span class="k">键帽顶面</span> <b>z = 23.30</b><br>
+        <span class="k">键帽底面</span> <b>z = 18.30</b><br>
         <span class="k">定位板顶面</span> <b>z = 14.80</b><br>
         <span class="k">定位板底面</span> <b>z = 13.60</b><br>
         <span class="k">PCB 上表面</span> <b>z = 8.60</b><br>
@@ -136,8 +136,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //    改尺寸请改 cad/lib/params.scad，然后跑：python tools/gen_viewer.py
 //GEN:CONST
 const PITCH = 18.0, CASE_WALL = 2.4, BORDER = 6.0;
-const PLATE_BOTTOM_Z = 13.6, PLATE_T = 1.2, CAP_GAP = 3.3;
-const CAP_Z = PLATE_BOTTOM_Z + PLATE_T + CAP_GAP;   // 18.1
+const PLATE_BOTTOM_Z = 13.6, PLATE_T = 1.2, CAP_GAP = 3.5;
+const CAP_Z = PLATE_BOTTOM_Z + PLATE_T + CAP_GAP;   // 18.3
 //GEN:CONST-END
 
 // [列, 行, 宽度u, 标签]

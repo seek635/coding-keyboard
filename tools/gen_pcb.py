@@ -14,16 +14,21 @@ ClaudePad PCB 网表与接线图生成器
 绘图采用「一份布局描述 + 两个渲染后端」：所有图元先记录到 Canvas，
 再分别由 SVG 和 Pillow 渲染，保证两张图内容完全一致。
 
-关键数据（已交叉验证两个独立开源封装库，坐标完全一致）：
+关键数据（2026-09-21 改按凯华官方规格图 —— 此前依据的两个开源封装库**已发现有误**）：
 
-  Kailh Choc **V2** (PG1353) PCB 焊盘坐标（原点 = 轴芯中心）：
-    电气引脚 1   (0, 5.9)    孔径 1.27      ← 与 V1 相同
-    电气引脚 2   (-5, 3.8)   孔径 1.27      ← 与 V1 相同
-    轴芯中心孔   (0, 0)      孔径 5.0       ← ★ V2 加大（V1 是 3.429）
-    侧固定孔     (±5.5, 0)   孔径 1.7018    ← ★ V2 取消 fixing pins，此孔无用但保留不影响
+  Kailh Choc **V2** (PG1353) PCB 封装（原点 = 轴芯中心）：
+    物理引脚     3 根      ← PCB 要钻 3 个孔，一个都不能省
+      其中金属电气脚 2 根  孔径 Ø1.20 PTH  ← ★ 官方图标注 `2-Ø1.20`，通电
+      其中不通电定位脚 1 根 孔径 Ø1.60 NPTH ← 轴体第 3 脚，不导通
+    轴芯中心孔   1 个       孔径 Ø5.00   ← 非金属化，让位给中央 Ø4.80 塑料凸台
+    另有 1 个 LED 焊盘
+    外形         15 × 15 × 5.3mm（图上另见底座外形 13.95 × 13.95）
 
-  ★ 2026-09-16 换用 Choc V2：键程 3.0 → 3.2；轴心由 3.4mm 矩形改为 5mm MX 十字。
-    【来源】themk.org PG1353 词条 + mwlabs.be 实装日志（两处独立印证）
+  ★ 三根引脚坐标已落定并经实物确认（2026-09-26）：(0,5.9) 电气 / (5,-5.15) 电气 / (-5,3.8) 不通电定位。
+    依据：官方图 5 个尺寸与 siderakb V1V2_THT_Hybrid 封装交叉吻合 + 用户万用表实测导通对确认。
+
+  ★ 键程 3.2±0.25mm（官方）｜轴心 5mm MX 十字（V1 是 3.4mm 矩形小十字，键帽不通用）
+    【来源】凯华 PG1353 官方规格图
 
   二极管方向 col2row：阳极接列、阴极接行，电流 列 → 行
     列 = 输出驱动（GPIO_ACTIVE_HIGH）
@@ -38,6 +43,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scad_params import load, load_keymap, find_project_root     # noqa: E402
+from console_utf8 import enable                                  # noqa: E402
+
+enable()
 
 ROOT = find_project_root() or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "pcb")
@@ -50,12 +58,51 @@ ROW_PINS = ["D4", "D5", "D6"]
 COL_PINS = ["D7", "D8", "D9", "D10", "D16", "D14"]
 APPROVE_PIN = "D14"
 
-# ---- Choc V2 (PG1353) PCB 焊盘（原点 = 轴芯中心，mm）------------------------
-CHOC_PAD1 = (0.0, 5.9)          # 与 V1 相同
-CHOC_PAD2 = (-5.0, 3.8)         # 与 V1 相同
-CHOC_PAD_DRILL = 1.27
-CHOC_CENTER_D = 5.00            # ★ V2：中心孔 5.0（V1 是 3.429）
-CHOC_SIDE_D = 1.7018            # V2 已取消 fixing pins，此值仅供钻孔参考
+# ---- Kailh Choc V2 (PG1353) PCB 封装（原点 = 轴芯中心，mm）------------------
+# ★ 2026-09-21 按凯华官方规格图。以下三个数据已确认：
+CHOC_PIN_COUNT = 3              # 物理引脚数（PCB 3 个孔，一个都不能省）
+CHOC_ELEC_PIN_COUNT = 2         # 其中金属电气脚（官方图 `2-Ø1.20`，PTH，通电）
+CHOC_ANCHOR_PIN_COUNT = 1       # 其中不通电定位脚（NPTH，不导通）
+CHOC_PIN_DRILL = 1.20           # 电气脚孔径（PTH）
+CHOC_ANCHOR_DRILL = 1.50        # 定位脚孔径（NPTH，官方图 2*1.5）
+CHOC_CENTER_D = 5.00            # 中心孔 Ø5.00，非金属化（让位给 Ø4.80 塑料凸台）
+# ★ 2026-09-26 坐标最终落定（凯华官方 datasheet CPG135301D01 2020-10-23 版，
+#   Recommended PCB Layout 矢量图 600dpi 像素标定，双尺寸交叉验证误差 0.1%）：
+#   电气脚 (−3.80, 4.93) 与 (−5.90, 0.00) Ø1.20 PTH；不通电定位脚 (5.15, −5.00) Ø1.50 NPTH。
+#   ⚠️ siderakb 社区封装是官方坐标的 x/y 互换错版，勿再引用其坐标。
+CHOC_PINS = [
+    {"xy": (-3.80, 4.93), "type": "elec",   "drill": 1.20},   # 电气脚 1（PTH）
+    {"xy": (-5.90, 0.00), "type": "elec",   "drill": 1.20},   # 电气脚 2（PTH）
+    {"xy": (5.15, -5.00), "type": "anchor", "drill": 1.50},   # 不通电定位脚（NPTH，官方 2*1.5）
+]
+CHOC_LED_POS = (5.15, 0.00)     # LED 焊盘中心（官方图）
+CHOC_PADS_UNRESOLVED = False    # 坐标已按官方 datasheet 像素标定落定
+
+# ---- 二极管选位（2026-09-26 v2，DRC 校正后固化，spec §7：三处共用同一份坐标）--
+# 12 只 1N4148 横躺在两条行间走廊（y=16 / y=34，宽 4.05mm，本体 Ø1.9 放得下）。
+# 约束（DRC 实测校正）：
+#   · 相邻二极管中心距 ≥ 10.32（跨距 7.62 + 焊盘 Ø2.5×2/2 + 间隙 0.2）
+#   · 支撑台 ⌀4（(40,16)(76,16)(40,34)(76,34)）：pad 中心距台心 ≥ 3.45
+#   · 主控左排孔带 x[78.22,83.72]（y 14.53~42.47 横贯两条走廊）→ 二极管中心 ≤ 68.74
+#   · 板缘：pad1 左缘 ≥ 0.5 → 中心 ≥ 6（pad1 = 中心 −3.81 −1.25）
+#   · 缺口 x≥90：pad2 右缘 ≤ 89.5 → 中心 ≤ 84.44（本布局最大 67.9，充裕）
+DIODE_POS = {
+    "PERM":    (6.0, 16.0),  "UP":   (16.5, 16.0), "MODEL": (27.0, 16.0),
+    "CMD":     (47.26, 16.0), "STOP": (57.58, 16.0), "APPROVE": (67.9, 16.0),
+    "LEFT":    (6.0, 34.0),  "DOWN": (16.5, 34.0), "RIGHT": (27.0, 34.0),
+    "SPACE":   (47.26, 34.0), "ENTER": (57.58, 34.0), "VOICE": (67.9, 34.0),
+}
+
+# ---- 轴体旋转角（文档视角，逆时针为正）--------------------------------------
+# 目的：让靠近主控（背面 x[79.7,97.48] y[8.5,41.5]）的轴体把 PTH 电气焊盘
+# 转离主控排针（正面两排孔 x=80.97/96.21，y 11.03~38.97），避免焊盘重叠；
+# 不通电 NPTH 定位脚尽量转出主控区（出不去的由 gen_kicad.py 省孔处理）。
+# KiCad 放置时取负角（y 轴方向约定相反）：θ_kicad = −θ_doc。
+SWITCH_ROT = {
+    ("STOP", 0): 0.0,      # (85,7)  主控下移 0.5 后 0° 焊盘即避开左排孔带（见 gen_kicad.py）
+    ("ENTER", 1): 180.0,   # (85,25) 电气焊盘转向右侧，避开排针左排
+    ("VOICE", 0): 180.0,   # (85,43) NPTH 转到 (79.85,48) 出主控区
+}
 
 PITCH = P["PITCH"]
 BORDER = P["PLATE_BORDER"]
@@ -99,6 +146,8 @@ def build():
             # 相对 PCB 左下角（画板子用这个）
             "pcb_positions": [(round(x - PCB_OX, 2), round(y - PCB_OY, 2))
                               for (x, y) in plate_pos],
+            # 二极管中心（行间走廊，2026-09-26 固化，spec §7）
+            "diode_pcb_pos": list(DIODE_POS.get(tag, [])),
         })
 
     keys.append({
@@ -106,6 +155,7 @@ def build():
         "net_row": "ROW1", "net_col": "COL6",
         "pin_row": ROW_PINS[0], "pin_col": APPROVE_PIN,
         "diode": "1N4148（建议）", "positions": [], "pcb_positions": [],
+        "diode_pcb_pos": list(DIODE_POS["APPROVE"]),
         "note": "SPDT 拨动开关，不是轴体。装在右壁，本体在壳内，公共端接 ROW1、常开端接 COL6",
     })
 
@@ -123,10 +173,19 @@ def build():
         "diode_rule": "阳极接列线，阴极接行线（电流 列 → 行）",
         "switch_footprint": {
             "name": "Kailh Choc V2 (PG1353)",
-            "pad1": CHOC_PAD1, "pad2": CHOC_PAD2,
+            "source": "凯华官方规格图",
+            "pins": CHOC_PINS,
+            "pin_count": CHOC_PIN_COUNT,
+            "elec_pin_count": CHOC_ELEC_PIN_COUNT,
+            "anchor_pin_count": CHOC_ANCHOR_PIN_COUNT,
+            "pin_drill_mm": CHOC_PIN_DRILL,
+            "anchor_drill_mm": CHOC_ANCHOR_DRILL,
+            "pin_note": "3 物理脚 = 2 金属电气脚(PTH Ø1.20, 官方图 2-Ø1.20, 通电)"
+                        " + 1 不通电定位脚(NPTH Ø1.50)",
+            "led_pad": CHOC_LED_POS,
+            "pin_size_mm": 2.0,
             "center_hole": (0.0, 0.0), "center_hole_d": CHOC_CENTER_D,
-            "side_holes": [(-5.5, 0.0), (5.5, 0.0)], "side_hole_d": CHOC_SIDE_D,
-            "pad_drill_mm": CHOC_PAD_DRILL, "pad_size_mm": 2.0,
+            "pads_unresolved": CHOC_PADS_UNRESOLVED,
         },
         "rows": rows, "cols": cols, "keys": keys,
         "total_switches": sum(k["switches"] for k in keys if k["label"] != "APPROVE"),
@@ -134,7 +193,8 @@ def build():
             "width": PCB_W, "height": PCB_H, "thickness": P["PCB_T"],
             "origin_offset_from_plate": [PCB_OX, PCB_OY],
             "notch_depth": PCB_NOTCH_D, "notch_length": PCB_NOTCH_L,
-            "notch_note": "右侧开缺口让位给拨杆本体，纵向对准拨杆位置",
+            "notch_y0": P["PCB_NOTCH_Y0"], "notch_y1": P["PCB_NOTCH_Y1"],
+            "notch_note": "右侧开缺口让位给拨杆本体，纵向区间 [0, 17.5]（对准拨杆中心 y=5.6）",
         },
     }
 
@@ -251,7 +311,7 @@ def write_md(nl):
     A("> 本文件由 `tools/gen_pcb.py` 从 `cad/lib/params.scad` 自动生成，不要手改。\n")
 
     A("## 1. 引脚分配\n")
-    A("| 信号 | nice!nano 引脚 | 说明 |")
+    A("| 信号 | 主控引脚（NoLogo ProMicro NRF52840 / nice!nano 兼容） | 说明 |")
     A("|---|---|---|")
     for r in nl["rows"]:
         A(f"| {r['name']} | **{r['pin']}** | 行，输入（`ACTIVE_HIGH \\| PULL_DOWN`） |")
@@ -292,24 +352,34 @@ def write_md(nl):
         A("> PCB：这几个轴体的焊盘用铜箔连到同一条行/列线。")
         A("> 手焊洞洞板：用一根导线把它们的引脚串起来。\n")
 
-    A("## 4. Choc V1 轴体 PCB 封装\n")
-    A("原点 = 轴芯中心。坐标已交叉验证两个独立开源封装库（daprice / siderakb），完全一致。\n")
-    A("| 特征 | 坐标 (x, y) mm | 孔径 mm | 类型 |")
-    A("|---|---|---|---|")
-    A(f"| 电气引脚 1 | ({CHOC_PAD1[0]}, {CHOC_PAD1[1]}) | {CHOC_PAD_DRILL} | 金属化 |")
-    A(f"| 电气引脚 2 | ({CHOC_PAD2[0]}, {CHOC_PAD2[1]}) | {CHOC_PAD_DRILL} | 金属化 |")
-    A("| 轴芯中心孔 | (0, 0) | 5.0 | 非金属化（V2 加大，V1 是 3.429）|")
-    A("| 侧固定孔 ×2 | (±5.5, 0) | 1.7018 | 非金属化（V2 已取消 fixing pins，可省略）|")
+    A("## 4. Choc V2 (PG1353) 轴体 PCB 封装\n")
+    A("原点 = 轴芯中心。**来源：凯华官方规格图**（PCB 板安装示意图）。\n")
+    A("> ⚠️ 2026-09-21 修订：此前本节依据两个开源封装库（daprice / siderakb）「交叉验证」，"
+      "但实物实测与该表不符 —— **两个库一起错了**。\n")
+    A("| 特征 | 坐标 (x, y) mm | 孔径 mm | 数量 | 类型 |")
+    A("|---|---|---|---|---|")
+    for p in CHOC_PINS:
+        if p["type"] == "elec":
+            A(f"| 金属电气脚 | ({p['xy'][0]:.2f}, {p['xy'][1]:.2f}) | {p['drill']:.2f} | 1 | 金属化（PTH），通电 |")
+        else:
+            A(f"| 不通电定位脚 | ({p['xy'][0]:.2f}, {p['xy'][1]:.2f}) | {p['drill']:.2f} | 1 | 非金属化（NPTH），不导通 |")
+    A(f"| 轴芯中心孔 | (0, 0) | {CHOC_CENTER_D} | 1 | 非金属化（NPTH） |")
+    A(f"| LED 焊盘 | ({CHOC_LED_POS[0]:.2f}, {CHOC_LED_POS[1]:.2f}) | — | 1 | 官方图标注 `LED` |")
     A("")
-    A("> 两电气引脚间距 = √(5² + 2.1²) = **5.42 mm**\n")
+    A("坐标来源：凯华官方 datasheet（CPG135301D01，2020-10-23 版）Recommended PCB Layout，")
+    A("600dpi 矢量图像素标定，双尺寸交叉验证误差 0.1%（2026-09-26 落定）。")
+    A(f"LED 焊盘中心 ({CHOC_LED_POS[0]:.2f}, {CHOC_LED_POS[1]:.2f})。")
+    A(f"PCB 必须钻满 {CHOC_PIN_COUNT} 个孔，一个都不能省（定位脚孔 NPTH，不导通）。")
+    A("★ 导通对已于 2026-09-26 经万用表实测确认（按下导通 = 电气脚对），坐标可用。\n")
+    A("**外形**：官方图标注 15 × 15 × 5.3mm，底座外形 13.95 × 13.95。\n")
 
     A("## 5. 其他元件\n")
     A("| 元件 | 连接 |")
     A("|---|---|")
     A("| 审批拨杆 SPDT | 公共端 → ROW1；常开端 → COL6。**串一只 1N4148 防鬼影** |")
-    A("| 电池 | JST 1.25 插座 → nice!nano 的 BAT 焊盘（注意极性） |")
+    A("| 电池 | 带引线的电池 → 主控 **B+ / B− 焊盘**（注意极性；该板不是 JST 插座） |")
     A("| 电源开关 | 串在电池正极与主控之间 |")
-    A("| 复位按钮 | 并联到 nice!nano 的 RST 焊盘 |")
+    A("| 复位按钮 | 并联到主控的 RST 焊盘（该板无板载复位按钮） |")
     A("| WS2812 | 数据线 → D15，电源接 3.3V/VCC，地接 GND |")
     A("")
 
@@ -359,22 +429,23 @@ def write_placement(nl):
             note = f"{k['label']}"
             if multi:
                 note += f"（{i+1}/{len(positions)} 并联到同一矩阵点）"
+            rot = SWITCH_ROT.get((k["label"], i), 0.0)
             L.append(f"{ref},switch,{k['label']},ROW{k['row']}xCOL{k['col']},"
-                     f"{x:.2f},{y:.2f},{x:.2f},{H - y:.2f},0,{note}")
+                     f"{x:.2f},{y:.2f},{x:.2f},{H - y:.2f},{rot:g},{note}")
 
     L.append("")
     L.append("# 二极管：型号 1N4148，阳极接列线、阴极接行线（col2row）")
-    L.append("# 建议放在对应轴体附近，具体位置布线时确定；下表给的是「轴体正上方 8mm」的建议位")
-    L.append("ref,type,matrix,suggest_x_mm,suggest_y_mm,note")
+    L.append("# 位置在行间走廊（y=16 / y=34），已避开支撑台与缺口（2026-09-26 固化）")
+    L.append("ref,type,matrix,x_mm,y_mm,x_kicad,y_kicad,rotation,note")
     d_n = 0
     for k in sorted(nl["keys"], key=lambda x: (x["row"], x["col"])):
-        positions = k.get("pcb_positions") or []
-        if not positions:
+        dx, dy = k.get("diode_pcb_pos") or (None, None)
+        if dx is None:
             continue
         d_n += 1
-        x, y = positions[0]
-        L.append(f"D{d_n},diode,ROW{k['row']}xCOL{k['col']},{x:.2f},{y - 8.0:.2f},"
-                 f"{k['label']}；阳极→COL{k['col']}，阴极→ROW{k['row']}")
+        note = f"{k['label']}；阳极→COL{k['col']}，阴极→ROW{k['row']}"
+        L.append(f"D{d_n},diode,ROW{k['row']}xCOL{k['col']},"
+                 f"{dx:.2f},{dy:.2f},{dx:.2f},{H - dy:.2f},0,{note}")
 
     p = os.path.join(OUT, "placement.csv")
     with open(p, "w", encoding="utf-8", newline="") as f:

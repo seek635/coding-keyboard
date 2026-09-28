@@ -23,6 +23,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scad_params import load, load_keymap     # noqa: E402
+from console_utf8 import enable               # noqa: E402
+
+enable()
 
 P = load()
 KEYMAP = load_keymap()

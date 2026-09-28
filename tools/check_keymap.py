@@ -21,6 +21,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scad_params import load_keymap     # noqa: E402
+from console_utf8 import enable         # noqa: E402
+
+enable()
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHIELD = os.path.join(ROOT, "firmware", "boards", "shields", "claudepad")

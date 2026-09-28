@@ -2,7 +2,7 @@
 
 三行五列 11 键 + 侧边审批拨杆的 ZMK shield 配置。
 
-**主控**：nice!nano v2（nRF52840，Pro Micro 引脚兼容）
+**主控**：NoLogo ProMicro NRF52840（原 SuperMini，兼容 nice!nano，Pro Micro 引脚兼容）
 **固件框架**：[ZMK](https://zmk.dev)（BLE 键盘事实标准）
 
 ---
@@ -66,8 +66,8 @@ firmware/
 即大键的多个轴体**电气上并联**，任一轴触发即响应。PCB 设计时要把这些焊盘接到同一条线。
 
 > ⚠️ **引脚分配必须与实际 PCB 一致。** 上面是一套建议分配；
-> 本项目 CAD 只定义了外壳和定位板，**PCB 尚未设计**。打板后如需调整，改
-> `claudepad.overlay` 里的 `row-gpios` / `col-gpios` 即可，键位不用动。
+> PCB 规格已定稿（`docs/PCB设计规格书.md`），但**尚未画出板文件**。
+> 打板后如需调整，改 `claudepad.overlay` 里的 `row-gpios` / `col-gpios` 即可，键位不用动。
 
 ---
 
@@ -104,8 +104,10 @@ west build -p -b nice_nano_v2 -s zmk/app -- \
 
 ## 怎么刷固件
 
-1. nice!nano 插 USB（**必须是数据线**）
-2. **双击板上的复位按钮** → 出现名为 `NICENANO` 的 U 盘
+1. 主控插 USB（**必须是数据线**）
+2. **进 bootloader** → 出现名为 `NICENANO` 的 U 盘
+   - ⚠️ NoLogo ProMicro **没有复位按钮**，要**在 0.5 秒内短接 2 次 RST 到 GND**
+   - 外壳底板预留了 φ8mm 孔，装一个外接轻触开关接在 RST–GND 之间（见 `docs/新手采购清单.md` 第 14 项）
 3. 把 `claudepad.uf2` 拖进去
 4. 板子自动重启，蓝牙广播名为 `ClaudePad`
 
