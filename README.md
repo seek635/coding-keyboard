@@ -84,16 +84,32 @@ firmware/                                     ← 这个目录的根 = 仓库根
 
 ## 怎么编译
 
-### 方式一：GitHub Actions（推荐，零环境）
+### 方式一：GitHub Actions（推荐，零环境）✅ 已跑通
 
-**这个目录（`firmware/`）的根必须就是仓库的根。** 也就是说要单独建一个仓库放它，
-不要塞进 `coding-keyboard` 这种 monorepo 的子目录 —— 官方 CI 用 repo 根目录
-定位 `build.yaml` 和 `config/`，套一层就全部错位。
+**已实测成功**：2026-10-01 首次构建通过，产出 138 KB 的 `.uf2`。
 
-1. 把 `firmware/` 的**内容**（不是这个文件夹本身）推成一个新仓库，例如 `claudepad-zmk`
-2. 推上去即自动触发构建；也可在 Actions 页面点 **Run workflow** 手动触发
-3. 构建完成后：Actions → 本次运行 → **Artifacts** → `firmware` →
-   里面的 `claudepad-nice_nano_v2-zmk.uf2` 就是刷机文件
+**为什么需要一个「根目录等于 firmware/」的分支或仓库**：官方 CI 用 repo 根目录
+定位 `build.yaml` 和 `config/`。本项目是 monorepo，`firmware/` 在子目录里，
+套一层就会全部错位。
+
+**当前的做法：`zmk-firmware` 分支**（用 git subtree 把 `firmware/` 的内容摊到根）：
+
+```bash
+# 更新固件后，重新生成并推送这个分支，CI 就会重新构建
+git subtree split --prefix=firmware -b zmk-firmware
+git push origin zmk-firmware --force
+```
+
+> 因为 subtree 会重写这段历史，所以推送要带 `--force`。这个分支**只用来构建**，
+> 不要在它上面开发 —— 所有改动都改 `main` 的 `firmware/`，然后重新 split。
+> 推 `main` 不会触发构建（根目录没有 `.github/workflows/`），只有推 `zmk-firmware` 会。
+
+**拿固件**：Actions → `Build ZMK firmware` → 最新一次运行 → **Artifacts** →
+`firmware` → 解压得到 `claudepad-nice_nano_v2-zmk.uf2`。
+也可在 Actions 页面点 **Run workflow** 手动触发。
+
+**更干净的长远方案**：把 `firmware/` 的内容单独建一个仓库（如 `claudepad-zmk`），
+仓库根就是现在这个目录，就不需要 subtree 那一步了。等固件稳定后可以迁过去。
 
 工作流本身只有一行实质内容 —— 复用 ZMK 官方的可复用工作流：
 
@@ -179,7 +195,7 @@ python tools/check_keymap.py
 
 | 限制 | 说明 |
 |---|---|
-| **从未真正编译过** | 本仓固件**一次都没有编译成功过**（写的时候本地无 Zephyr 工具链）。语法是照 ZMK 官方源码逐条核对的，但首次 CI 构建仍可能报错，属正常范围。 |
+| **已编译通过，但未上机** | ✅ 2026-10-01 GitHub Actions 首次构建成功（ZMK v0.3.0，产出 138 KB `.uf2`）。⚠️ 但**从未烧进真机**——BLE 配对、按键手感、长按/双击的判定窗口都要等板子到货后才能验证。 |
 | **状态指示未实现** | PRD 第 8 章要求「按键 RGB 显示当前权限档位」，这需要自定义固件 + 上位机通过 GATT 回写状态。当前固件只做键位。 |
 | **审批拨杆只上报状态** | 拨杆作为矩阵里的一个键（F13），上位机需自行监听。真正的自动审批逻辑在上位机侧。 |
 | **引脚分配已定稿** | ✅ 2026-10-01 交叉校验通过：`claudepad.overlay` 的 行 D4/D5/D6、列 D7/D8/D9/D10/D16/D14 与**已下单的** PCB 网表（`pcb/netlist.json`）逐项一致，二极管方向同为 `col2row`。此校验已固化进 `tools/check_keymap.py`。 |
