@@ -49,8 +49,9 @@ need_files = [
     ("cad/case_bottom.scad", "底座模型"),
     ("cad/keycap.scad", "键帽模型"),
     ("cad/test_coupon.scad", "校准试件"),
-    ("firmware/boards/shields/claudepad/claudepad.keymap", "固件键位"),
-    ("firmware/boards/shields/claudepad/claudepad.overlay", "固件矩阵"),
+    ("firmware/config/boards/shields/claudepad/claudepad.keymap", "固件键位"),
+    ("firmware/config/boards/shields/claudepad/claudepad.overlay", "固件矩阵"),
+    ("firmware/.github/workflows/build.yml", "固件 CI 构建"),
 ]
 missing = [p for p, _ in need_files if not os.path.exists(os.path.join(ROOT, p))]
 if not missing:

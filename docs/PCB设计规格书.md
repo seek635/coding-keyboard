@@ -96,8 +96,9 @@
 | COL1 … COL6 | D7 / D8 / D9 / D10 / D16 / D14 | 输出 |
 | RGB 数据 | D15 | 输出 |
 
-> 这套分配必须与 `firmware/boards/shields/claudepad/claudepad.overlay` 一致。
-> 改了这边就要改那边，`tools/check_keymap.py` 会检查键位顺序但**不检查引脚**，需人工确认。
+> 这套分配必须与 `firmware/config/boards/shields/claudepad/claudepad.overlay` 一致。
+> `tools/check_keymap.py` 现在会**自动交叉校验**行/列引脚与二极管方向（2026-10-01 补上），
+> 与 `pcb/netlist.json` 不一致会直接报错 —— 不再依赖人工确认。
 
 ### 3.3 大键并联（重要）
 

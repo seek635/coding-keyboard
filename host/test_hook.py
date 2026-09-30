@@ -19,17 +19,32 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOOK = os.path.join(HERE, "claudepad_hook.py")
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "tools"))
+from console_utf8 import enable                         # noqa: E402
 from switchctl import set_approval, STATE_DIR, LOG_FILE     # noqa: E402
+
+enable()
 
 results = []
 
 
 def run_hook(payload: dict):
     """调用 hook，返回 (exit_code, 解析后的输出或 None)"""
+    # ⚠️ 两端编码都必须显式钉成 UTF-8，缺一不可：
+    #   · 父进程：只写 text=True 时用「本地 locale 编码」（简体中文 Windows 上是
+    #     cp936/GBK）解码子进程输出 → 必须补 encoding="utf-8"
+    #   · 子进程：hook 的输出被重定向到管道时，也按 locale 编码写字节
+    #     → 必须用 PYTHONIOENCODING=utf-8 让它写 UTF-8
+    # 只修一边会变成"另一种"解码失败：读线程抛 UnicodeDecodeError 直接死掉，
+    # r.stdout 变成 None，而报错是毫不相干的
+    # "AttributeError: 'NoneType' object has no attribute 'strip'"。
+    # hook 返回的 permissionDecisionReason 含中文，所以这个坑必然踩到。
     r = subprocess.run(
         [sys.executable, HOOK],
         input=json.dumps(payload, ensure_ascii=False),
-        capture_output=True, text=True, timeout=15,
+        capture_output=True, text=True, encoding="utf-8",
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+        timeout=15,
     )
     out = r.stdout.strip()
     try:

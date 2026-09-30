@@ -7,7 +7,7 @@ ClaudePad 拨杆控制器（宿主侧）
   1. 【守护模式】监听全局键盘事件，捕捉键盘发来的信号键，维护拨杆状态
   2. 【手动模式】命令行直接开关拨杆，用于**没有键盘硬件时也能测试整条链路**
 
-键盘发来的信号（见 firmware/boards/shields/claudepad/claudepad.keymap）：
+键盘发来的信号（见 firmware/config/boards/shields/claudepad/claudepad.keymap）：
   · F13 按下 / 释放  → 审批拨杆 ON / OFF
   · Ctrl+Alt+Shift+F14 → 「循环切换模型」请求
   · Ctrl+Alt+Shift+F13 → 「复位到 default」请求

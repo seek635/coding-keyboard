@@ -15,6 +15,7 @@
 运行：python tools/check_keymap.py
 """
 
+import json
 import os
 import re
 import sys
@@ -26,7 +27,7 @@ from console_utf8 import enable         # noqa: E402
 enable()
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SHIELD = os.path.join(ROOT, "firmware", "boards", "shields", "claudepad")
+SHIELD = os.path.join(ROOT, "firmware", "config", "boards", "shields", "claudepad")
 OVERLAY = os.path.join(SHIELD, "claudepad.overlay")
 KEYMAP = os.path.join(SHIELD, "claudepad.keymap")
 
@@ -216,6 +217,101 @@ def main():
             n_axis = 3 if u >= 3 else 2
             print(f"  {tag}（{u}u）：定位板开 {n_axis} 个轴孔，电气上并联到同一矩阵交点")
     print("  ⚠️ 这要求 PCB 把大键的多个轴体焊盘接到同一条行线/列线")
+
+    # ---- 6. zmk-config 布局自检（决定 CI 能不能编译）----
+    # 这些是 2026-10-01 实际踩过的坑：布局错一处，GitHub Actions 就编不出来，
+    # 而且报错信息很绕（"shield not found"）。固化成检查，避免再犯。
+    print(f"\n【zmk-config 布局自检】")
+    fw = os.path.join(ROOT, "firmware")
+
+    want = os.path.join("config", "boards", "shields", "claudepad")
+    actual = os.path.relpath(SHIELD, fw).replace("\\", "/")
+    if actual == want.replace("\\", "/"):
+        print(f"  ✅ shield 位置正确：{actual}")
+    else:
+        print(f"  ❌ shield 位置错误：{actual}（应为 {want}）")
+        errors.append(f"shield 不在 <ZMK_CONFIG>/boards/shields/ 下：{actual}")
+
+    module_yml = os.path.join(fw, "zephyr", "module.yml")
+    if os.path.exists(module_yml):
+        print("  ❌ 存在 firmware/zephyr/module.yml —— 官方 CI 会改走「模块」分支")
+        errors.append("firmware/zephyr/module.yml 存在，会让 CI 走模块路径而找不到 shield")
+    else:
+        print("  ✅ 无 zephyr/module.yml（保持标准 zmk-config，CI 走默认路径）")
+
+    build_yaml = os.path.join(fw, "build.yaml")
+    shields = []
+    if os.path.exists(build_yaml):
+        with open(build_yaml, encoding="utf-8") as f:
+            shields = re.findall(r"^\s*shield:\s*(\S+)", f.read(), re.M)
+    if shields == ["claudepad"]:
+        print("  ✅ build.yaml 声明 shield = claudepad")
+    else:
+        print(f"  ❌ build.yaml 的 shield = {shields}（应为 ['claudepad']）")
+        errors.append(f"build.yaml 的 shield 声明与目录名不符：{shields}")
+
+    west = os.path.join(fw, "config", "west.yml")
+    wf = os.path.join(fw, ".github", "workflows", "build.yml")
+    rev = ref = None
+    if os.path.exists(west):
+        with open(west, encoding="utf-8") as f:
+            m = re.search(r"name:\s*zmk\b.*?revision:\s*(\S+)", f.read(), re.S)
+            rev = m.group(1) if m else None
+    if not os.path.exists(wf):
+        print("  ❌ 缺少 .github/workflows/build.yml —— 推上去不会触发构建")
+        errors.append("缺少 GitHub Actions 工作流文件，推送后不会有任何构建")
+    else:
+        with open(wf, encoding="utf-8") as f:
+            m = re.search(r"build-user-config\.yml@(\S+)", f.read())
+            ref = m.group(1) if m else None
+        if rev and ref and rev == ref:
+            print(f"  ✅ ZMK 版本一致：west.yml 与 workflow 均为 {rev}")
+        else:
+            print(f"  ❌ ZMK 版本不一致：west.yml={rev}，workflow={ref}")
+            errors.append(f"west.yml({rev}) 与 workflow({ref}) 的 ZMK 版本不一致")
+
+    # ---- 7. 引脚交叉校验（固件 ↔ PCB 网表）----
+    # docs/PCB设计规格书.md 第 100 行原本写着：「check_keymap 会检查键位顺序但
+    # 不检查引脚，需人工确认」。这里补上自动校验。
+    # 引脚错了的后果很隐蔽：固件能编译、板子也焊得出来，但整机完全不工作。
+    print(f"\n【引脚交叉校验（固件 ↔ PCB 网表）】")
+    netlist = os.path.join(ROOT, "pcb", "netlist.json")
+    if not os.path.exists(netlist):
+        print("  ⚠️ 找不到 pcb/netlist.json，跳过")
+    else:
+        with open(netlist, encoding="utf-8") as f:
+            nl = json.load(f)
+        with open(OVERLAY, encoding="utf-8") as f:
+            ov = strip_comments(f.read())
+
+        # `&pro_micro N` 在 nice_nano / Pro Micro 兼容板上就是 D N
+        # （依据 ZMK app/boards/arm/nice_nano/arduino_pro_micro_pins.dtsi：
+        #   4→gpio0 22、7→gpio0 11、16→gpio0 10、14→gpio1 11，正是 D4/D7/D16/D14）
+        def gpio_pins(prop):
+            m = re.search(prop + r"([^;]*);", ov, re.S)
+            if not m:
+                return []
+            return [f"D{n}" for n in re.findall(r"&pro_micro\s+(\d+)", m.group(1))]
+
+        for prop, key, label in (("row-gpios", "rows", "行"), ("col-gpios", "cols", "列")):
+            got = gpio_pins(prop)
+            want = nl["pinout"][key]
+            if got == want:
+                print(f"  ✅ {label}引脚一致：{' '.join(got)}")
+            else:
+                print(f"  ❌ {label}引脚不一致")
+                print(f"       固件：{' '.join(got) or '(未解析到)'}")
+                print(f"       PCB ：{' '.join(want)}")
+                errors.append(f"{label}引脚 固件({got}) ≠ PCB 网表({want})")
+
+        m = re.search(r'diode-direction\s*=\s*"(\w+)"', ov)
+        got_dir = m.group(1) if m else None
+        want_dir = nl.get("diode_direction")
+        if got_dir == want_dir:
+            print(f"  ✅ 二极管方向一致：{got_dir}（阳极接列、阴极接行）")
+        else:
+            print(f"  ❌ 二极管方向不一致：固件={got_dir}，PCB={want_dir}")
+            errors.append(f"二极管方向 固件({got_dir}) ≠ PCB({want_dir})")
 
     # ---- 汇总 ----
     print("\n" + "=" * 74)

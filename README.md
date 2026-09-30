@@ -85,7 +85,7 @@ cad/          参数化 3D 模型（OpenSCAD）+ 渲染产物
   output/viewer.html 可交互三维查看器（three.js）
 
 firmware/     ZMK shield 固件配置
-  boards/shields/claudepad/*.keymap   ★ 键位与手势
+  config/boards/shields/claudepad/*.keymap   ★ 键位与手势
 
 host/         宿主程序（审批拨杆实现）
   claudepad_daemon.py   ★ 常驻：HTTP hook 应答 + 键盘监听
