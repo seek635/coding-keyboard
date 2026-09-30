@@ -1,0 +1,30 @@
+# ClaudePad 固件自动构建（GitHub Actions）
+# -----------------------------------------------------------------------------
+# 直接复用 ZMK 官方的「可复用工作流」，它在 zmkfirmware/zmk-build-arm 容器里
+# 跑 west init / west update / west build，产出 zmk.uf2 —— 本地不需要任何工具链。
+#
+# 本目录（firmware/）就是一个标准 zmk-config，工作流全部用默认约定，无需传参：
+#   build.yaml                        ← 构建矩阵（板子 nice_nano_v2 + shield claudepad）
+#   config/west.yml                   ← ZMK 上游版本锁定
+#   config/boards/shields/claudepad/  ← shield 本体（ZMK 从 <ZMK_CONFIG>/boards/shields/ 找）
+#
+# ⚠️ 下面 @v0.3.0 必须与 config/west.yml 里的 zmk revision 一致。
+#    两者错配会让构建脚本与 ZMK 版本对不上，是最隐蔽的一类失败。
+#
+# ⚠️ 这个仓库的根目录必须是 firmware/ 的内容（即 zephyr/module.yml 不再存在）。
+#    官方工作流靠 repo 根目录判断是不是 ZMK 模块：如果根目录有 zephyr/module.yml，
+#    它会改走「模块」分支，把 config 复制到临时目录并传 -DZMK_EXTRA_MODULES，
+#    那样 shield 的查找路径会变。本项目用最标准的 zmk-config 布局，故保持无该文件。
+#
+# 用法：推送到 GitHub 后自动触发；也可在 Actions 页面点 "Run workflow" 手动触发。
+# 产物：Actions → 本次运行 → Artifacts → firmware（内含 claudepad-nice_nano_v2-zmk.uf2）
+name: Build ZMK firmware
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0

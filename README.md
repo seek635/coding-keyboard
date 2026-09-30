@@ -9,21 +9,31 @@
 
 ## 目录结构
 
+本目录就是一个**标准 zmk-config**（ZMK 最主流的仓库布局，不用模块机制）：
+
 ```
-firmware/
-├── build.yaml                                  ← GitHub Actions 构建配置
-├── config/
-│   └── west.yml                                ← ZMK 上游依赖（版本锁定）
-├── zephyr/
-│   └── module.yml                              ← 模块定义
-└── boards/shields/claudepad/
-    ├── Kconfig.shield                          ← shield 标识
-    ├── Kconfig.defconfig                       ← 设备名等默认配置
-    ├── claudepad.overlay                       ← 矩阵 + 引脚 + 变换
-    ├── claudepad.keymap                        ← ★ 键位与手势（核心）
-    ├── claudepad.conf                          ← 配置建议
-    └── claudepad.zmk.yml                       ← 硬件元数据
+firmware/                                     ← 这个目录的根 = 仓库根
+├── .github/workflows/build.yml               ← GitHub Actions：推上去自动编译出 .uf2
+├── build.yaml                                ← 构建矩阵：板子 nice_nano_v2 + shield claudepad
+├── config/                                   ← ZMK_CONFIG 指向这里
+│   ├── west.yml                              ← ZMK 上游依赖（版本锁定，须与 workflow 一致）
+│   └── boards/shields/claudepad/             ← ★ shield 必须在 config/boards/shields/ 下
+│       ├── Kconfig.shield                    ← shield 标识
+│       ├── Kconfig.defconfig                 ← 设备名等默认配置
+│       ├── claudepad.overlay                 ← 矩阵 + 引脚 + 变换
+│       ├── claudepad.keymap                  ← ★ 键位与手势（核心）
+│       ├── claudepad.conf                    ← 配置建议
+│       └── claudepad.zmk.yml                 ← 硬件元数据
 ```
+
+> **⚠️ 两个曾经踩过的坑（已由 `tools/check_keymap.py` 自动拦截）**
+>
+> 1. **shield 必须在 `config/boards/shields/` 里**。ZMK 只从 `<ZMK_CONFIG>/boards/shields/`
+>    查找 shield（依据 `app/keymap-module/modules/modules.cmake` 与 `app/Kconfig`）。
+>    放错层级 → 构建报 `shield not found`，而且报错信息很绕。
+> 2. **不要在这里放 `zephyr/module.yml`**。官方 CI 工作流会靠它判断「这是不是一个 ZMK 模块」，
+>    一旦存在就改走模块分支（把 config 复制到临时目录、另传 `-DZMK_EXTRA_MODULES`），
+>    shield 查找路径随之改变。本项目用标准布局，故不设该文件。
 
 ---
 
@@ -65,9 +75,10 @@ firmware/
 
 即大键的多个轴体**电气上并联**，任一轴触发即响应。PCB 设计时要把这些焊盘接到同一条线。
 
-> ⚠️ **引脚分配必须与实际 PCB 一致。** 上面是一套建议分配；
-> PCB 规格已定稿（`docs/PCB设计规格书.md`），但**尚未画出板文件**。
-> 打板后如需调整，改 `claudepad.overlay` 里的 `row-gpios` / `col-gpios` 即可，键位不用动。
+> ✅ **引脚分配已定稿并与 PCB 交叉校验通过**（2026-10-01）。板上走线就是这套分配，
+> PCB 已于 2026-09-28 下单。`tools/check_keymap.py` 会拿 `claudepad.overlay` 与
+> `pcb/netlist.json` 逐项比对，改任一边不一致就会报错。
+> 若确需调整，改 `claudepad.overlay` 里的 `row-gpios` / `col-gpios` 即可，键位不用动。
 
 ---
 
@@ -75,18 +86,33 @@ firmware/
 
 ### 方式一：GitHub Actions（推荐，零环境）
 
-1. 把这个 `firmware/` 目录推到一个 GitHub 仓库
-2. Actions 会自动构建（配置见 `build.yaml`）
-3. 构建完成后在 Actions 的 Artifacts 里下载 `claudepad.uf2`
+**这个目录（`firmware/`）的根必须就是仓库的根。** 也就是说要单独建一个仓库放它，
+不要塞进 `coding-keyboard` 这种 monorepo 的子目录 —— 官方 CI 用 repo 根目录
+定位 `build.yaml` 和 `config/`，套一层就全部错位。
+
+1. 把 `firmware/` 的**内容**（不是这个文件夹本身）推成一个新仓库，例如 `claudepad-zmk`
+2. 推上去即自动触发构建；也可在 Actions 页面点 **Run workflow** 手动触发
+3. 构建完成后：Actions → 本次运行 → **Artifacts** → `firmware` →
+   里面的 `claudepad-nice_nano_v2-zmk.uf2` 就是刷机文件
+
+工作流本身只有一行实质内容 —— 复用 ZMK 官方的可复用工作流：
+
+```yaml
+uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0
+```
+
+> ⚠️ 这个 `@v0.3.0` 必须与 `config/west.yml` 里的 zmk `revision` 一致，
+> 否则构建脚本和 ZMK 版本对不上。`tools/check_keymap.py` 会检查这一条。
 
 ### 方式二：本地构建
 
-需要 Zephyr SDK + west。步骤：
+需要 Zephyr SDK + west（Windows 上配置繁琐，**一般直接用方式一**）。
 
 ```bash
-# 1. 初始化 workspace
-west init -l firmware/config
-cd firmware
+cd firmware                      # 本目录
+
+# 1. 初始化 workspace（本目录即 workspace 根）
+west init -l config
 west update
 
 # 2. 构建
@@ -98,7 +124,8 @@ west build -p -b nice_nano_v2 -s zmk/app -- \
 #   build/zephyr/zmk.uf2
 ```
 
-> Windows 上本地构建环境配置较繁琐，**建议直接用 GitHub Actions**。
+本地构建**不需要** `ZMK_EXTRA_MODULES` —— shield 就在 `config/boards/shields/` 下，
+ZMK 会自动把 `ZMK_CONFIG` 加进 board root。
 
 ---
 
@@ -152,8 +179,9 @@ python tools/check_keymap.py
 
 | 限制 | 说明 |
 |---|---|
+| **从未真正编译过** | 本仓固件**一次都没有编译成功过**（写的时候本地无 Zephyr 工具链）。语法是照 ZMK 官方源码逐条核对的，但首次 CI 构建仍可能报错，属正常范围。 |
 | **状态指示未实现** | PRD 第 8 章要求「按键 RGB 显示当前权限档位」，这需要自定义固件 + 上位机通过 GATT 回写状态。当前固件只做键位。 |
 | **审批拨杆只上报状态** | 拨杆作为矩阵里的一个键（F13），上位机需自行监听。真正的自动审批逻辑在上位机侧。 |
-| **引脚分配待 PCB 定稿** | 见上文。 |
+| **引脚分配已定稿** | ✅ 2026-10-01 交叉校验通过：`claudepad.overlay` 的 行 D4/D5/D6、列 D7/D8/D9/D10/D16/D14 与**已下单的** PCB 网表（`pcb/netlist.json`）逐项一致，二极管方向同为 `col2row`。此校验已固化进 `tools/check_keymap.py`。 |
 
 详见 `docs/固件设计说明.md` 的「后续工作」。

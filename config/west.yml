@@ -2,6 +2,16 @@
 # -----------------------------------------------------------------------------
 # 版本锁定在稳定的 tag 上，避免上游改动导致构建失败。
 # 想升级时改 revision 即可。
+#
+# ⚠️ 这个 revision 必须与 .github/workflows/build.yml 里引用的 ZMK 工作流版本
+#    保持一致 —— 工作流脚本负责调 west，版本错配会让构建脚本和 ZMK 对不上。
+#
+# v0.1.0 → v0.3.0（2026-10-01）：
+#   v0.1.0 发布于 2024-12，而 GitHub Actions 用的 zmkfirmware/zmk-build-arm:stable
+#   镜像跟着 ZMK 主线走，两者相差约两年，首次构建失败风险高。
+#   v0.3.0（2025-08）是当前最新正式版，与镜像匹配。
+#   已核对：v0.3.0 的 app/west.yml 结构、nice_nano 的 pro_micro 引脚映射
+#   （D4/D5/D6/D7/D8/D9/D10/D16/D14）与 v0.1.0 完全一致，shield 无需改动。
 manifest:
   remotes:
     - name: zmkfirmware
@@ -9,7 +19,7 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: v0.1.0
+      revision: v0.3.0
       import: app/west.yml
   self:
     path: config
