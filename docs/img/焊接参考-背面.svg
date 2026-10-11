@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 780" font-family="sans-serif">
+<rect width="1240" height="780" fill="#14161a"/>
+<polygon points="1105.6,352.2 776.5,162.2 776.5,150.0 1105.6,340.0" fill="#0e2616" stroke="#00000033"/>
+<polygon points="776.5,162.2 184.1,504.2 184.1,492.0 776.5,150.0" fill="#0e2616" stroke="#00000033"/>
+<polygon points="184.1,504.2 263.1,549.8 263.1,537.6 184.1,492.0" fill="#246039" stroke="#00000033"/>
+<polygon points="460.6,724.6 1105.6,352.2 1105.6,340.0 460.6,712.4" fill="#1b482b" stroke="#00000033"/>
+<polygon points="263.1,549.8 210.5,580.2 210.5,568.0 263.1,537.6" fill="#0e2616" stroke="#00000033"/>
+<polygon points="210.5,580.2 460.6,724.6 460.6,712.4 210.5,568.0" fill="#246039" stroke="#00000033"/>
+<polygon points="776.5,150.0 184.1,492.0 263.1,537.6 210.5,568.0 460.6,712.4 1105.6,340.0" fill="#2f7d4a" stroke="#00000055"/>
+<polygon points="551.4,625.8 434.4,693.3 434.4,669.0 551.4,601.4" fill="#122339" stroke="#00000022"/>
+<polygon points="217.2,567.9 434.4,693.3 434.4,669.0 217.2,543.6" fill="#19304e" stroke="#00000022"/>
+<polygon points="334.2,476.0 217.2,543.6 434.4,669.0 551.4,601.4" fill="#1e3a5f" stroke="#00000022"/>
+<polygon points="372.4,649.3 359.9,656.5 359.9,636.8 372.4,629.6" fill="#6f7277" stroke="#00000022"/>
+<polygon points="300.6,622.3 359.9,656.5 359.9,636.8 300.6,602.6" fill="#989ca2" stroke="#00000022"/>
+<polygon points="313.1,595.4 300.6,602.6 359.9,636.8 372.4,629.6" fill="#b9bec6" stroke="#00000022"/>
+<polygon points="1066.1,324.8 868.6,438.8 868.6,408.4 1066.1,294.4" fill="#737678" stroke="#00000022"/>
+<polygon points="605.4,286.8 868.6,438.8 868.6,408.4 605.4,256.4" fill="#9da1a4" stroke="#00000022"/>
+<polygon points="802.8,142.4 605.4,256.4 868.6,408.4 1066.1,294.4" fill="#c0c4c8" stroke="#00000022"/>
+<text x="384" y="547" text-anchor="middle" font-size="12" fill="#cfe3ff">主控 NoLogo NRF52840（元件面朝下）</text>
+<text x="836" y="250" text-anchor="middle" font-size="12" fill="#f2f3f5">电池（示意）</text>
+<text x="309" y="642" text-anchor="middle" font-size="11" fill="#f2f3f5">USB-C 朝右壁</text>
+<text x="80" y="40" font-size="15" fill="#9fc4e8">背面视图（左右已镜像 = 从板底往上看）</text>
+<text x="80" y="62" font-size="12" fill="#8b93a3">主控套在 24 根排针脚上再焊 · 电池红线→电源开关→B+，黑线→B-</text>
+</svg>

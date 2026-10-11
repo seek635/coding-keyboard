@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 952 540" font-family="sans-serif">
+<rect width="952" height="540" fill="#14161a"/>
+<polygon points="55,485 829,485 829,382 898,382 898,55 55,55" fill="#2f7d4a" stroke="#6fae86" stroke-width="2"/>
+<rect x="102" y="360" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="167" y="429" text-anchor="middle" font-size="12" fill="#fff">PERM</text>
+<circle cx="134.1" cy="382.4" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="116.1" cy="424.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="211.1" cy="467.8" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="257" y="360" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="322" y="429" text-anchor="middle" font-size="12" fill="#fff">UP</text>
+<circle cx="288.9" cy="382.4" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="270.9" cy="424.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="365.9" cy="467.8" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="412" y="360" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="476" y="429" text-anchor="middle" font-size="12" fill="#fff">MODEL</text>
+<circle cx="443.7" cy="382.4" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="425.7" cy="424.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="520.7" cy="467.8" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="567" y="360" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="631" y="429" text-anchor="middle" font-size="12" fill="#fff">CMD</text>
+<circle cx="598.5" cy="382.4" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="580.5" cy="424.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="675.5" cy="467.8" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="722" y="360" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="786" y="429" text-anchor="middle" font-size="12" fill="#fff">STOP</text>
+<circle cx="753.3" cy="382.4" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="735.3" cy="424.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="830.3" cy="467.8" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="102" y="206" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="167" y="274" text-anchor="middle" font-size="12" fill="#fff">LEFT</text>
+<circle cx="134.1" cy="227.6" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="116.1" cy="270.0" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="211.1" cy="313.0" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="257" y="206" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="322" y="274" text-anchor="middle" font-size="12" fill="#fff">DOWN</text>
+<circle cx="288.9" cy="227.6" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="270.9" cy="270.0" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="365.9" cy="313.0" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="412" y="206" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="476" y="274" text-anchor="middle" font-size="12" fill="#fff">RIGHT</text>
+<circle cx="443.7" cy="227.6" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="425.7" cy="270.0" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="520.7" cy="313.0" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="567" y="206" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="631" y="274" text-anchor="middle" font-size="12" fill="#fff">ENTER</text>
+<circle cx="598.5" cy="227.6" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="580.5" cy="270.0" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="675.5" cy="313.0" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="722" y="206" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="786" y="274" text-anchor="middle" font-size="12" fill="#fff">ENTER</text>
+<circle cx="818.7" cy="312.4" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="836.7" cy="270.0" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="741.7" cy="227.0" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="102" y="51" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="167" y="119" text-anchor="middle" font-size="12" fill="#fff">SPACE</text>
+<circle cx="134.1" cy="72.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="116.1" cy="115.2" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="211.1" cy="158.2" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="334" y="51" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="399" y="119" text-anchor="middle" font-size="12" fill="#fff">SPACE</text>
+<circle cx="366.3" cy="72.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="348.3" cy="115.2" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="443.3" cy="158.2" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="567" y="51" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="631" y="119" text-anchor="middle" font-size="12" fill="#fff">SPACE</text>
+<circle cx="598.5" cy="72.8" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="580.5" cy="115.2" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="675.5" cy="158.2" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="722" y="51" width="129" height="129" rx="4" fill="#33333d" stroke="#5a5a68"/>
+<text x="786" y="119" text-anchor="middle" font-size="12" fill="#fff">VOICE</text>
+<circle cx="818.7" cy="157.6" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="836.7" cy="115.2" r="6.9" fill="#d4af37" stroke="#d4af37" stroke-width="1.2"/>
+<circle cx="741.7" cy="72.2" r="6.9" fill="none" stroke="#d4af37" stroke-width="1.2"/>
+<rect x="72.2" y="336.2" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="72.2" y="336.2" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="107" y="351" text-anchor="middle" font-size="10" fill="#1c1c20">D1</text>
+<rect x="162.5" y="336.2" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="162.5" y="336.2" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="197" y="351" text-anchor="middle" font-size="10" fill="#1c1c20">D2</text>
+<rect x="252.8" y="336.2" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="252.8" y="336.2" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="287" y="351" text-anchor="middle" font-size="10" fill="#1c1c20">D3</text>
+<rect x="427.0" y="336.2" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="427.0" y="336.2" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="461" y="351" text-anchor="middle" font-size="10" fill="#1c1c20">D4</text>
+<rect x="515.8" y="336.2" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="515.8" y="336.2" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="550" y="351" text-anchor="middle" font-size="10" fill="#1c1c20">D5</text>
+<rect x="604.5" y="336.2" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="604.5" y="336.2" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="639" y="351" text-anchor="middle" font-size="10" fill="#1c1c20">D6</text>
+<rect x="72.2" y="181.4" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="72.2" y="181.4" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="107" y="197" text-anchor="middle" font-size="10" fill="#1c1c20">D7</text>
+<rect x="162.5" y="181.4" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="162.5" y="181.4" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="197" y="197" text-anchor="middle" font-size="10" fill="#1c1c20">D8</text>
+<rect x="252.8" y="181.4" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="252.8" y="181.4" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="287" y="197" text-anchor="middle" font-size="10" fill="#1c1c20">D9</text>
+<rect x="515.8" y="181.4" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="515.8" y="181.4" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="550" y="197" text-anchor="middle" font-size="10" fill="#1c1c20">D10</text>
+<rect x="427.0" y="181.4" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="427.0" y="181.4" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="461" y="197" text-anchor="middle" font-size="10" fill="#1c1c20">D11</text>
+<rect x="604.5" y="181.4" width="68.8" height="22.4" rx="2" fill="#c8862a" stroke="#e8b96a"/>
+<rect x="604.5" y="181.4" width="12.0" height="22.4" fill="#1c1c20"/>
+<text x="639" y="197" text-anchor="middle" font-size="10" fill="#1c1c20">D12</text>
+<rect x="740.4" y="110.9" width="21.8" height="253.7" fill="#17171a" stroke="#3c3c46"/>
+<text x="751" y="48" text-anchor="middle" font-size="11" fill="#9fd6ae">JP1 ×12 针 ↓</text>
+<rect x="871.5" y="110.9" width="21.8" height="253.7" fill="#17171a" stroke="#3c3c46"/>
+<text x="882" y="48" text-anchor="middle" font-size="11" fill="#9fd6ae">JP2 ×12 针 ↓</text>
+<circle cx="820.4" cy="343.1" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="829" y="347" text-anchor="start" font-size="10" fill="#ffe9b0">LEV1</text>
+<circle cx="790.3" cy="349.1" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="799" y="353" text-anchor="start" font-size="10" fill="#ffe9b0">LEV2</text>
+<circle cx="691.4" cy="338.8" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="682" y="343" text-anchor="end" font-size="10" fill="#ffe9b0">RST1</text>
+<circle cx="725.8" cy="338.8" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="717" y="343" text-anchor="end" font-size="10" fill="#ffe9b0">GND1</text>
+<circle cx="708.6" cy="295.8" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="700" y="300" text-anchor="end" font-size="10" fill="#ffe9b0">RGB1</text>
+<circle cx="80.8" cy="287.2" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="90" y="291" text-anchor="start" font-size="10" fill="#ffe9b0">PWR1</text>
+<circle cx="80.8" cy="252.8" r="6.4" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>
+<text x="90" y="257" text-anchor="start" font-size="10" fill="#ffe9b0">PWR2</text>
+<text x="863" y="437" text-anchor="middle" font-size="10" fill="#ff9d9d">缺口</text>
+<text x="863" y="451" text-anchor="middle" font-size="9" fill="#d98a8a">拨杆让位</text>
+<text x="55" y="28" font-size="13" fill="#9fd6ae">↑ 上=SPACE 排 · 下=行1（PERM…STOP） · 右=USB/缺口（与 KiCad 屏幕方向一致）</text>
+<text x="55" y="524" font-size="13" fill="#ffd98a">← 所有二极管色环端（阴极 K→ROW）一律朝左（x 小的一侧）</text>
+</svg>
