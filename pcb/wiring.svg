@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 940" width="1280" height="940" font-family="-apple-system, Segoe UI, Microsoft YaHei, sans-serif">
 <rect width="100%" height="100%" fill="#ffffff"/>
 <text x="40.0" y="46.0" font-size="24" fill="#111827" text-anchor="start" font-weight="600">ClaudePad 接线图 · 3 行 × 6 列矩阵</text>
-<text x="40.0" y="74.0" font-size="14" fill="#6b7280" text-anchor="start">二极管方向 col2row：阳极接列、阴极接行，电流 列 → 行 ｜ 由 tools/gen_pcb.py 生成</text>
+<text x="40.0" y="74.0" font-size="14" fill="#6b7280" text-anchor="start">二极管方向 col2row：阳极朝列、阴极朝行（串联：列→二极管→轴体→行），电流 列 → 行 ｜ 由 tools/gen_pcb.py 生成</text>
 <line x1="300.0" y1="150.0" x2="300.0" y2="642.0" stroke="#dc2626" stroke-width="2.5"/>
 <line x1="450.0" y1="150.0" x2="450.0" y2="492.0" stroke="#dc2626" stroke-width="2.5"/>
 <line x1="600.0" y1="150.0" x2="600.0" y2="492.0" stroke="#dc2626" stroke-width="2.5"/>
@@ -163,7 +163,7 @@
 <text x="106.0" y="858.0" font-size="12" fill="#4b5563" text-anchor="start">行线（输入读取，ACTIVE_HIGH | PULL_DOWN）</text>
 <polygon points="70.0,872.0 82.0,872.0 76.0,884.0" fill="#dc2626" stroke="none" stroke-width="1"/>
 <line x1="70.0" y1="884.0" x2="82.0" y2="884.0" stroke="#dc2626" stroke-width="2.4"/>
-<text x="106.0" y="884.0" font-size="12" fill="#4b5563" text-anchor="start">1N4148 · 阳极接列、阴极接行（col2row）</text>
+<text x="106.0" y="884.0" font-size="12" fill="#4b5563" text-anchor="start">1N4148 · 阳极朝列、阴极朝行（串联：列→二极管→轴体→行）（col2row）</text>
 <rect x="660.0" y="780.0" width="580.0" height="126.0" rx="10" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
 <text x="676.0" y="806.0" font-size="14" fill="#374151" text-anchor="start" font-weight="600">单个按键回路</text>
 <text x="676.0" y="838.0" font-size="13" fill="#111827" text-anchor="start">列线 → 二极管阳极 → 阴极 → 轴体 → 行线</text>

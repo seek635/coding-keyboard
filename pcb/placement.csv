@@ -25,7 +25,7 @@ SW12,switch,SPACE,ROW3xCOL1,31.00,43.00,31.00,7.00,0,SPACE（2/3 并联到同一
 SW13,switch,SPACE,ROW3xCOL1,49.00,43.00,49.00,7.00,0,SPACE（3/3 并联到同一矩阵点）
 SW14,switch,VOICE,ROW3xCOL4,67.00,43.00,67.00,7.00,180,VOICE
 
-# 二极管：型号 1N4148，阳极接列线、阴极接行线（col2row）
+# 二极管：型号 1N4148，阳极朝列线、阴极朝行线（与轴体串联）（col2row）
 # 位置在行间走廊（y=16 / y=34），已避开支撑台与缺口（2026-09-26 固化）
 ref,type,matrix,x_mm,y_mm,x_kicad,y_kicad,rotation,note
 D1,diode,ROW1xCOL1,6.00,16.00,6.00,34.00,0,PERM；阳极→COL1，阴极→ROW1

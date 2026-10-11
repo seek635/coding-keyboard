@@ -18,6 +18,14 @@ ClaudePad KiCad PCB 生成器
   转换 T（视角转换，非实物镜像）：x_k = x_doc, y_k = H − y_doc
   旋转换算：θ_kicad = −θ_doc（文档逆时针 → KiCad 顺时针同值）
 
+★ 2026-10-11 修电路拓扑（致命）：轴体与二极管必须**串联**，不能并联。
+  正解（与 netlist.md 的「列 → 二极管阳极 → 阴极 → 轴体 → 行」一致）：
+      列 COL ── A▷|── K ── MID ── 轴体pad1 ── 轴体pad2 ── ROW 行
+  MID 是每个矩阵位置一条的局部网络（大键的多个轴体 pad1 共用同一个 MID）。
+  改之前：轴体 pad1→COL、pad2→ROW，二极管 A→COL、K→ROW —— 二极管与轴体**并联**，
+  驱动任一列都会经二极管直接灌通行线 → 该列按键恒为「按下」，整块板不可用。
+  （第一版板子也带着这个错；幸好它因为 12 孔问题已作废。）
+
 输出后验证：
   · 本文件自带自检（焊盘间距/缺口/板缘/主控区 NPTH/网络对照）
   · kicad-cli pcb drc（unconnected 为布线阶段预期项，其余须 0 错误）
@@ -146,8 +154,10 @@ def warn(msg):
 # ============================== 封装构造 =====================================
 def make_choc_fp(board, ref, pos_doc, rot_doc, nets, skip_nth):
     """自建 Choc V2 封装（原点=轴芯中心）。
-    pos_doc: 文档坐标轴心；nets: (col_net, row_net)；skip_nth: 省略的孔序号集合。
-    pad1 = 电气脚1 → COL；pad2 = 电气脚2 → ROW；pad3 = 定位脚 NPTH；中心孔 NPTH。
+    pos_doc: 文档坐标轴心；nets: (mid_net, row_net)；skip_nth: 省略的孔序号集合。
+    pad1 = 电气脚1 → MID（二极管那一侧）；pad2 = 电气脚2 → ROW（行线侧）；
+    pad3 = 定位脚 NPTH；中心孔 NPTH。
+    串联链：COL ── A▷|── K ── MID ── pad1 ──[按下]── pad2 ── ROW
     """
     x, y = pos_doc[0], 50.0 - pos_doc[1]
     fp = pcbnew.FOOTPRINT(board)
@@ -270,7 +280,7 @@ def build():
             rot_doc = nl_switch_rot(nl, k["label"], i)
             skip = {2} if (k["label"], i) in NPTH_SKIP else set()
             make_choc_fp(board, f"SW{sw_n}", (x, y), rot_doc,
-                         (k["net_col"], k["net_row"]), skip)
+                         (k["net_mid"], k["net_row"]), skip)
 
     # ---- 12 只二极管（官方库加载，pad1=K→ROW、pad2=A→COL）----------------
     # ★ 该封装原点在 pad1（K），pad2 在 +7.62 → 放置点 = 中心 − 3.81
@@ -287,7 +297,8 @@ def build():
         fp.SetValue("1N4148")
         pad_k = fp.FindPadByNumber("1")
         pad_a = fp.FindPadByNumber("2")
-        pad_k.SetNet(net_for(board, k["net_row"]))
+        # ★ 串联：阴极 K → MID（轴体那一侧），阳极 A → COL（列线）
+        pad_k.SetNet(net_for(board, k["net_mid"]))
         pad_a.SetNet(net_for(board, k["net_col"]))
 
     # ---- 主控排针 ×2（正面 PTH，主控本体在背面）---------------------------
@@ -385,17 +396,37 @@ def verify(board, nl):
                 "npth": pad.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH,
             })
 
-    # 1) 网络对照：每键 2 个电气 pad = COL/ROW
-    keymap = {}
+    # 1) ★ 电路拓扑对照（2026-10-11 重写）：断言「二极管与轴体串联」
+    #    链：COL ── A▷|── K ── MID ── 轴体pad1 ──[按下]── pad2 ── ROW
+    #    为什么要有这条：生成器一度把二极管与轴体接成**并联**（轴体 pad1→COL、pad2→ROW，
+    #    二极管 A→COL、K→ROW）—— 驱动任一列都会经二极管直接灌通行线，该列按键恒为按下，
+    #    整块板不可用。而间距 / 板缘 / 缺口这些**几何检查一条都发现不了**，必须断言网络。
+    sw_want = {"1": "net_mid", "2": "net_row"}      # 轴体：pad1→MID，pad2→ROW
+    keymap, diodemap = {}, {}
     for k in nl["keys"]:
         for pos in k.get("pcb_positions") or []:
-            keymap[(round(pos[0], 2), round(pos[1], 2))] = (k["net_col"], k["net_row"], k["label"])
+            keymap[(round(pos[0], 2), round(pos[1], 2))] = k
+        dp = k.get("diode_pcb_pos") or None
+        if dp:
+            # 二极管封装原点 = pad1(K)，pad2 在 +7.62 → 放置点 = 中心 − 3.81
+            diodemap[(round(dp[0] - 3.81, 2), round(dp[1], 2))] = (k, "net_mid")   # K → MID
+            diodemap[(round(dp[0] + 3.81, 2), round(dp[1], 2))] = (k, "net_col")   # A → COL
     for p in pads:
         if p["npth"] or p["drill"] > 3:
             continue
-        key = keymap.get((round(p["x"], 2), round(p["y_doc"], 2)))
-        if key and p["net"] not in key[:2]:
-            err(f"{p['ref']}.{p['num']} net={p['net']} ≠ 期望 {key[:2]} @({p['x']},{p['y_doc']})")
+        pt = (round(p["x"], 2), round(p["y_doc"], 2))
+        k = keymap.get(pt)
+        if k and p["ref"].startswith("SW"):
+            want = k[sw_want[p["num"]]]
+            if p["net"] != want:
+                err(f"{p['ref']}.{p['num']} net={p['net']} ≠ 期望 {want}"
+                    f"（轴体必须 pad1→MID / pad2→ROW，与二极管串联）")
+        dk = diodemap.get(pt)
+        if dk and p["ref"].startswith("D"):
+            want = dk[0][dk[1]]
+            if p["net"] != want:
+                err(f"{p['ref']}.{p['num']} net={p['net']} ≠ 期望 {want}"
+                    f"（二极管必须 A→COL / K→MID，与轴体串联）")
 
     # 2) 异 net PTH 焊盘间距 ≥ 0.3mm
     pth = [p for p in pads if not p["npth"]]

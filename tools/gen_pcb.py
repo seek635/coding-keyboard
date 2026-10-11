@@ -30,7 +30,7 @@ ClaudePad PCB 网表与接线图生成器
   ★ 键程 3.2±0.25mm（官方）｜轴心 5mm MX 十字（V1 是 3.4mm 矩形小十字，键帽不通用）
     【来源】凯华 PG1353 官方规格图
 
-  二极管方向 col2row：阳极接列、阴极接行，电流 列 → 行
+  二极管方向 col2row：阳极朝列、阴极朝行（串联：列→二极管→轴体→行），电流 列 → 行
     列 = 输出驱动（GPIO_ACTIVE_HIGH）
     行 = 输入读取（GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN）
 
@@ -153,7 +153,14 @@ def build():
         keys.append({
             "label": tag, "row": r, "col": c, "width_u": u,
             "switches": n_switch(u),
+            # ★ 2026-10-11 修拓扑：轴体与二极管必须**串联**，不是并联。
+            #   正解：列 → 轴体(pad1) → [中间节点 MID] → 二极管(A→K) → 行
+            #   原先只给了 net_col / net_row 两个网络，于是轴体 pad2 和二极管 A 都被
+            #   挂到 ROW / COL 上 —— 二极管与轴体并联，驱动列就会直接灌通行线，
+            #   该列所有按键恒为「按下」，键盘不可用（第一版板子也带着这个错）。
+            #   大键的多个轴体共用同一个 MID（pad2 并联）✓
             "net_row": f"ROW{r}", "net_col": f"COL{c}",
+            "net_mid": f"MID_R{r}C{c}",
             "pin_row": ROW_PINS[r - 1], "pin_col": COL_PINS[c - 1],
             "diode": "1N4148",
             # 相对定位板左下角
@@ -168,6 +175,8 @@ def build():
     keys.append({
         "label": "APPROVE", "row": 1, "col": 6, "width_u": 1, "switches": 1,
         "net_row": "ROW1", "net_col": "COL6",
+        # 拨杆这条支路本来就是串联的：ROW1 → 拨杆 COM/NO → APPROVE_MID → 二极管 → COL6
+        "net_mid": "APPROVE_MID",
         "pin_row": ROW_PINS[0], "pin_col": APPROVE_PIN,
         "diode": "1N4148（建议）", "positions": [], "pcb_positions": [],
         "diode_pcb_pos": list(DIODE_POS["APPROVE"]),
@@ -185,7 +194,7 @@ def build():
         "pinout": {"rows": ROW_PINS, "cols": COL_PINS,
                    "approve": APPROVE_PIN, "rgb_data": "D15"},
         "diode_direction": "col2row",
-        "diode_rule": "阳极接列线，阴极接行线（电流 列 → 行）",
+        "diode_rule": "阳极朝列线、阴极朝行线（与轴体串联）（电流 列 → 行）",
         "switch_footprint": {
             "name": "Kailh Choc V2 (PG1353)",
             "source": "凯华官方规格图",
@@ -251,7 +260,7 @@ def draw_wiring(nl):
 
     # 标题
     c.text(40, 46, "ClaudePad 接线图 · 3 行 × 6 列矩阵", 24, C_TEXT, "start", True)
-    c.text(40, 74, "二极管方向 col2row：阳极接列、阴极接行，电流 列 → 行 ｜ 由 tools/gen_pcb.py 生成",
+    c.text(40, 74, "二极管方向 col2row：阳极朝列、阴极朝行（串联：列→二极管→轴体→行），电流 列 → 行 ｜ 由 tools/gen_pcb.py 生成",
            14, C_MUTED)
 
     # 列线（垂直）与行线（水平）——先画线，方块后画以遮住线
@@ -317,7 +326,7 @@ def draw_wiring(nl):
     c.text(lx + 66, ly + 78, "行线（输入读取，ACTIVE_HIGH | PULL_DOWN）", 12, "#4b5563")
     c.poly([(lx + 30, ly + 92), (lx + 42, ly + 92), (lx + 36, ly + 104)], C_COL)
     c.line(lx + 30, ly + 104, lx + 42, ly + 104, C_COL, 2.4)
-    c.text(lx + 66, ly + 104, "1N4148 · 阳极接列、阴极接行（col2row）", 12, "#4b5563")
+    c.text(lx + 66, ly + 104, "1N4148 · 阳极朝列、阴极朝行（串联：列→二极管→轴体→行）（col2row）", 12, "#4b5563")
 
     # 单键回路说明
     rx, ry = 660, 780
@@ -361,17 +370,24 @@ def write_md(nl):
     A("## 2. 二极管方向\n")
     A(f"`diode-direction = \"{nl['diode_direction']}\"`\n")
     A(f"**{nl['diode_rule']}**\n")
-    A("即每个按键回路：**列线 → 二极管阳极 → 二极管阴极 → 轴体 → 行线**\n")
-    A("> 接反不会烧，但矩阵读不出来。修正二选一：所有二极管掉头，"
+    A("每个按键回路（★ **串联**，不是并联）：\n")
+    A("```")
+    A("  列 COL ── 二极管阳极A ▷|── 阴极K ── [中间节点 MID] ── 轴体pad1 ──[按下]── pad2 ── ROW 行")
+    A("```")
+    A("其中 **MID** 是每个矩阵位置一条的局部网络（大键的多个轴体 pad1 共用一个 MID）。\n")
+    A("> ⚠️ 2026-10-11 修正：此前生成器只给 COL/ROW 两个网络，轴体 pad2 与二极管 A 都挂在\n"
+      "> COL/ROW 上 → 二极管与轴体**并联** → 驱动任一列都会经二极管直接灌通行线，\n"
+      "> 该列按键恒为「按下」，键盘不可用。现在由 `gen_kicad.py` 的自检断言防复发。\n")
+    A("> 二极管接反不会烧，但矩阵读不出来。修正二选一：所有二极管掉头，"
       "或把固件 `diode-direction` 改成 `\"row2col\"`。\n")
 
     A("## 3. 按键接线对照表\n")
-    A("| # | 按键 | 矩阵位置 | 行线 | 列线 | 轴体数 | 二极管 |")
-    A("|---|---|---|---|---|---|---|")
+    A("| # | 按键 | 矩阵位置 | 行线 | 列线 | 中间节点 MID | 轴体数 | 二极管 |")
+    A("|---|---|---|---|---|---|---|---|")
     for i, k in enumerate(nl["keys"], 1):
         A(f"| {i} | **{k['label']}** | 行{k['row']}·列{k['col']} | "
           f"{k['net_row']}({k['pin_row']}) | {k['net_col']}({k['pin_col']}) | "
-          f"{k['switches']} | {k['diode']} |")
+          f"{k['net_mid']} | {k['switches']} | {k['diode']} |")
     A("")
 
     big = [k for k in nl["keys"] if k["switches"] > 1]
@@ -472,7 +488,7 @@ def write_placement(nl):
                      f"{x:.2f},{y:.2f},{x:.2f},{H - y:.2f},{rot:g},{note}")
 
     L.append("")
-    L.append("# 二极管：型号 1N4148，阳极接列线、阴极接行线（col2row）")
+    L.append("# 二极管：型号 1N4148，阳极朝列线、阴极朝行线（与轴体串联）（col2row）")
     L.append("# 位置在行间走廊（y=16 / y=34），已避开支撑台与缺口（2026-09-26 固化）")
     L.append("ref,type,matrix,x_mm,y_mm,x_kicad,y_kicad,rotation,note")
     d_n = 0

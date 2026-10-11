@@ -308,7 +308,7 @@ def main():
         got_dir = m.group(1) if m else None
         want_dir = nl.get("diode_direction")
         if got_dir == want_dir:
-            print(f"  ✅ 二极管方向一致：{got_dir}（阳极接列、阴极接行）")
+            print(f"  ✅ 二极管方向一致：{got_dir}（阳极朝列、阴极朝行（串联：列→二极管→轴体→行））")
         else:
             print(f"  ❌ 二极管方向不一致：固件={got_dir}，PCB={want_dir}")
             errors.append(f"二极管方向 固件({got_dir}) ≠ PCB({want_dir})")
