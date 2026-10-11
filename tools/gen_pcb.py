@@ -115,10 +115,14 @@ SWITCH_ROT = {
 
 PITCH = P["PITCH"]
 BORDER = P["PLATE_BORDER"]
-# PCB 相对定位板的偏移（PCB 比定位板小一圈，居中放置）
+# PCB 相对定位板的偏移
+# ★ 2026-10-11 修正：原先这里**自己又算了一遍** (PLATE_W − PCB_W)/2，而不是读 params 的
+#   PCB_X。PCB 加宽到 99 后两者分叉：这里算 1.5，params 写 2.0 —— 而 check_dims 读的是
+#   params 的 PCB_X。结果所有轴体的 PCB 坐标整体漂了 0.5mm（85 → 85.5），
+#   只有真正的干涉计算（孔对孔）才暴露出来。改为**只读 params**，杜绝第二次计算。
 PCB_W, PCB_H = P["PCB_W"], P["PCB_H"]
-PCB_OX = (P["PLATE_W"] - PCB_W) / 2      # = 8.0
-PCB_OY = (P["PLATE_H"] - PCB_H) / 2      # = 8.0
+PCB_OX = P["PCB_X"]
+PCB_OY = P["PCB_Y"]
 PCB_NOTCH_D, PCB_NOTCH_L = P["PCB_NOTCH_D"], P["PCB_NOTCH_L"]
 
 # 配色

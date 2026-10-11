@@ -294,8 +294,11 @@ print(f"  支撑台直径        : {f(sup_d)} mm")
 # 第一个轴体中心（PCB 坐标系）
 # ★ 2026-09-16 修 bug：原来 x 和 y 都用了 x 方向的偏移（PCB_X）。
 #   当 PCB_X == PCB_Y == 8 时巧合正确；PCB 加宽后 PCB_X 变成 2，y 检查就误报了。
-first_x = P["PLATE_BORDER"] + P["PITCH"] / 2 - (P["PLATE_W"] - P["PCB_W"]) / 2
-first_y = P["PLATE_BORDER"] + P["PITCH"] / 2 - (P["PLATE_H"] - P["PCB_H"]) / 2
+# ★ 2026-10-11 再修：这里**又自己算了一遍** (PLATE_W − PCB_W)/2，而不是读 params 的
+#   PCB_X。PCB 加宽到 99 后两者分叉（1.5 vs 2.0），于是本检查误报「支撑台不在间隙中心」。
+#   现在只读 params —— 与 gen_pcb.py 一致，杜绝第二处计算。
+first_x = P["PLATE_BORDER"] + P["PITCH"] / 2 - P["PCB_X"]
+first_y = P["PLATE_BORDER"] + P["PITCH"] / 2 - P["PCB_Y"]
 valid_x = {round(first_x + P["PITCH"] / 2 + i * P["PITCH"], 2) for i in range(4)}
 valid_y = {round(first_y + P["PITCH"] / 2 + i * P["PITCH"], 2) for i in range(2)}
 print(f"  合法的空隙中心 x  : {sorted(valid_x)}")

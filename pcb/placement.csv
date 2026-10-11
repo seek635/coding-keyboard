@@ -1,6 +1,6 @@
 # ClaudePad 元件坐标表（供 KiCad 放置用）
 # 由 tools/gen_pcb.py 从 cad/lib/params.scad 生成 —— 勿手改
-# 板子外形 98.0 × 50.0 mm，厚 1.6 mm
+# 板子外形 99.0 × 50.0 mm，厚 1.6 mm
 #
 # 坐标系：板左下角为原点
 #   x_mm / y_mm        本设计坐标系（Y 向上）

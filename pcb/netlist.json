@@ -521,22 +521,22 @@
     "pin_span": 30.48,
     "on_back": true,
     "pos": [
-      79.7,
-      14.0
+      80.11,
+      12.26
     ],
     "row_dx": 15.240000000000002,
     "usb_side": "short-edge(+y)",
     "pin_note": "每排 13 脚，跨距 30.48 = 12 × 2.54（★ 12 脚只有 11 个间距 = 27.94，第一版 PCB 就是错在这里）"
   },
   "pcb": {
-    "width": 98.0,
+    "width": 99.0,
     "height": 50.0,
     "thickness": 1.6,
     "origin_offset_from_plate": [
       2.0,
       8.0
     ],
-    "notch_depth": 8.0,
+    "notch_depth": 9.0,
     "notch_length": 24.0,
     "notch_y0": 0.0,
     "notch_y1": 9.0,
