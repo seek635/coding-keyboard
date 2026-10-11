@@ -141,7 +141,9 @@ SILVER = (0.75, 0.75, 0.78); BATT = (0.76, 0.78, 0.80); RED = (0.80, 0.20, 0.20)
 
 def _promicro(b, dx, dy, dz):
     b.box(dx,      dy,      dz - 0.8,  17.78, 33.0, 1.6, NAVY)      # 主控板
-    b.box(dx + 9.64, dy,   dz - 0.6,  1.5, 9.0, 1.8, SILVER)        # USB-C → +x（右壁）
+    # ★ 2026-10-11 更正：USB-C 在**短边**上（沿 33mm 长轴），不是 +x。
+    #   本设计主控长轴沿 y → USB 朝 pad1 那一端（模型局部 -y，因 KiCad 局部 +y 向下）。
+    b.box(dx,      dy - 17.25, dz - 0.6, 9.0, 1.5, 1.8, SILVER)     # USB-C → -y（短边，pad1 端）
     b.box(dx - 2.0,  dy + 4.0, dz - 2.1, 10.0, 10.0, 1.0, BLACK)    # NRF 屏蔽罩
     b.box(dx + 4.5,  dy - 8.0, dz - 1.95, 3.2, 2.0, 0.7, SILVER)    # 晶振
     b.box(dx - 7.0,  dy - 12.0, dz - 1.68, 2.5, 2.0, 0.16, GOLD)    # B+ 焊盘
@@ -175,9 +177,10 @@ MODELS = {
         b.box(0, 0, 6.0, 4.2, 1.3, 1.4, GRAY_S),                    # MX 十字 x
         b.box(0, 0, 6.0, 1.3, 4.2, 1.4, GRAY_S),                    # MX 十字 y
     ),
-    "header_pins_front.step": lambda b: [b.box(0, k * 2.54, 1.8, 0.64, 0.64, 3.6, GOLD) for k in range(12)],
-    "header_plastic_back.step": lambda b: b.box(0, 13.97, -1.25, 2.54, 27.94, 2.5, BLACK),
-    "promicro_at_JP1.step": lambda b: _promicro(b, 7.62, 13.97, -2.5),   # 挂 JP1(kicad 80.97,7.03) → 中心 kicad (88.59,21)
+    # ★ 2026-10-11：一排是 13 个脚（跨距 30.48），原为 12（27.94）—— 与实际板子对齐
+    "header_pins_front.step": lambda b: [b.box(0, k * 2.54, 1.8, 0.64, 0.64, 3.6, GOLD) for k in range(13)],
+    "header_plastic_back.step": lambda b: b.box(0, 15.24, -1.25, 2.54, 30.48, 2.5, BLACK),
+    "promicro_at_JP1.step": lambda b: _promicro(b, 7.62, 15.24, -2.5),   # 挂 JP1 → 中心落在 13 孔跨距中点 15.24
     "battery_at_PWR1.step": lambda b: _battery(b, 13, -2, -1.6),         # 挂 PWR1(kicad 3,27) → 中心 kicad (16,25)，顶面贴板底
     "aux_parts_at_PWR1.step": _aux_parts,                                # 挂 PWR1：电源开关/复位按钮/引线头
     "lever_at_LEV1.step": _lever,                                        # 挂 LEV1：拨杆（缺口处示意）
