@@ -189,12 +189,31 @@ def build():
         },
         "rows": rows, "cols": cols, "keys": keys,
         "total_switches": sum(k["switches"] for k in keys if k["label"] != "APPROVE"),
+        # ---- 主控排针（2026-10-11 新增）------------------------------------
+        # 之前 netlist 里完全没有主控引脚数据，gen_kicad.py 只能自己写死数字，
+        # 于是「一排几个孔」这个致命参数没有任何一处校验 → 第一版按 1×12 打了出来。
+        # 现在把厂商事实放进 netlist，由 gen_kicad.py 对着它断言。
+        "mcu": {
+            "name": "NoLogo ProMicro NRF52840",
+            "width": P["NANO_W"], "length": P["NANO_L"], "height": P["NANO_H"],
+            "pin_count": P["NANO_PIN_COUNT"],
+            "pin_pitch": P["NANO_PIN_PITCH"],
+            "pin_span": P["NANO_PIN_SPAN"],
+            "on_back": P["NANO_ON_BACK"],
+            "pos": [P["NANO_POS_X"], P["NANO_POS_Y"]],
+            "row_dx": P["NANO_W"] - 2 * 1.27,
+            "usb_side": "short-edge(+y)",
+            "pin_note": "每排 13 脚，跨距 30.48 = 12 × 2.54"
+                        "（★ 12 脚只有 11 个间距 = 27.94，第一版 PCB 就是错在这里）",
+        },
         "pcb": {
             "width": PCB_W, "height": PCB_H, "thickness": P["PCB_T"],
             "origin_offset_from_plate": [PCB_OX, PCB_OY],
             "notch_depth": PCB_NOTCH_D, "notch_length": PCB_NOTCH_L,
             "notch_y0": P["PCB_NOTCH_Y0"], "notch_y1": P["PCB_NOTCH_Y1"],
-            "notch_note": "右侧开缺口让位给拨杆本体，纵向区间 [0, 17.5]（对准拨杆中心 y=5.6）",
+            "notch_note": f"右侧开缺口让位给拨杆本体，纵向区间 "
+                          f"[{P['PCB_NOTCH_Y0']:.0f}, {P['PCB_NOTCH_Y1']:.0f}]"
+                          f"（下缘截断；上缘受主控右排最低孔约束）",
         },
     }
 

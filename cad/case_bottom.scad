@@ -133,25 +133,33 @@ module wire_channels() {
         cube([WIRE_CH_W, CASE_INNER_D - 4, WIRE_CH_D + 0.01]);
 }
 
-// ---------- 右壁：USB-C 开孔 ---------------------------------------------
-// 主控装在 PCB 背面（下表面），USB 口朝右壁，开口是「横长」的槽（宽 > 高）
-// ★ 2026-09-16 方案 A：开孔高度从「PCB 上表面上方」改到「PCB 下表面下方」
+// ---------- 上壁（+y）：USB-C 开孔 ---------------------------------------
+// ⛔ 2026-10-11 重做：原 usb_cutout() 开在**右壁**（x 方向），位置和朝向都不对。
+//   实物 USB-C 座在主控的**短边**上（沿 33mm 长轴）；本设计主控长轴沿 y，
+//   所以 USB 实际朝 **+y**（PCB 上缘那一侧），与右壁毫无关系。
+//   （连带：2026-09-16「PCB 加宽 86→98 解决 USB 够不到右壁」是在解决不存在的问题。）
 //
-// ⚠️ 注意 rotate([0,90,0]) 之后：局部 X 轴 → 世界 Z 轴（垂直）
-//    所以要沿「局部 Y 轴」偏移，才能得到水平方向的槽。
+// 为什么这个孔必须能过「插头胶壳」，而不只是金属头：
+//   插座位于外壳 y ≈ 57.4；内腔上壁内表面在 68.7 → **插座距壁 11.3mm**。
+//   USB-C 插头金属部分只有 6.5mm，光靠它够不到插座；
+//   必须让插头的**肩部（胶壳前脸）伸进内腔**到 y ≈ 63.9 才能插到底。
+//   而壁厚只有 2.4mm，做不出 4.5mm 深的沉台 → 只能把孔按胶壳截面开（约 11×8）。
+//   ⚠️ 代价：孔比标准 USB 口大。想要小孔就得把主控再往 +y 顶
+//   （受 VOICE 定位孔限制）或改用 USB-C 面板延长线。
+//
 // 开孔高度随主控安装面自动切换（正面 / 背面）
 // 主控的 USB 口在板边缘，开孔中心取「PCB 表面 ± 1.80」
 USB_CUT_Z = NANO_ON_BACK ? PCB_BOTTOM_Z - 1.80 : PCB_TOP_Z + 1.80;
 
-module usb_cutout() {
-    d = NANO_USB_H + NANO_USB_TOL;                       // 槽高
-    off = NANO_USB_W + NANO_USB_TOL - d;                 // 槽宽 - 槽高
-    translate([CASE_W - CASE_WALL - 2, NANO_Y + NANO_L / 2, USB_CUT_Z])
-        rotate([0, 90, 0])
-            hull() {
-                cylinder(d = d, h = CASE_WALL + 6);
-                translate([0, off, 0]) cylinder(d = d, h = CASE_WALL + 6);
-            }
+module usb_port() {
+    // 槽中心 x = 主控短边中点；沿 y 贯穿上壁
+    // 圆角矩形惯用法：offset(r) 套 offset(delta=-r)，方框传**全尺寸**
+    // （内层先缩 r、外层再圆角扩回 r）—— 传 (w-2r) 会缩成零面积，孔就切不出来
+    translate([NANO_X + NANO_W / 2, CASE_D - CASE_WALL - 1, USB_CUT_Z])
+        rotate([-90, 0, 0])
+            linear_extrude(height = CASE_WALL + 2)
+                offset(r = USB_PORT_R) offset(delta = -USB_PORT_R)
+                    square([USB_PORT_W, USB_PORT_H], center = true);
 }
 
 // ---------- 右壁：拨杆凸台与开孔 -----------------------------------------
@@ -206,7 +214,7 @@ module case_bottom() {
             battery_bay();
             switch_boss();
         }
-        usb_cutout();
+        usb_port();
         switch_cutouts();
         bottom_features();
         wire_channels();

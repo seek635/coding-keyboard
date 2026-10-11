@@ -38,7 +38,7 @@ KICAD_LIB = r"D:\kicad\share\kicad\footprints"
 DIODE_FP_LIB = os.path.join(KICAD_LIB, "Diode_THT.pretty")
 DIODE_FP_NAME = "D_DO-35_SOD27_P7.62mm_Horizontal"
 HDR_FP_LIB = os.path.join(KICAD_LIB, "Connector_PinHeader_2.54mm.pretty")
-HDR_FP_NAME = "PinHeader_1x12_P2.54mm_Vertical"
+HDR_FP_NAME = "PinHeader_1x13_P2.54mm_Vertical"
 
 
 def mm(v):
@@ -56,16 +56,42 @@ def to_mm(iu):
 #   y[12,45]：STOP 0° pad1 (81.2,11.93) 距左排首孔 (80.97,14.53) 仅 0.11mm → 下移 0.5；
 #   终值 y[12.5,45.5]：左排孔带 y≥15.03，STOP 0° 焊盘间距 0.61 ✓；
 #   外壳右壁 USB 开孔 y 位置联动（z 不变）。
-# 排针 12 孔 ×2.54，跨距 27.94，两端余 2.53 → 孔 y 文档 15.03~42.97；
-# 两排间距 15.24 → x = 79.70+1.27 = 80.97（左）与 96.21（右）。
+# ★ y 位置第四轮校正（2026-10-11，为 USB 可达性重新定位）
+#   USB-C 在短边上（沿 33mm 长轴）→ 本设计主控长轴沿 y → USB 朝 +y。
+#   两个约束夹出可用区间：
+#     下界：最低孔不能撞 STOP(85,7) 0° 的电气焊盘 (81.2,11.93)（13 孔居中时会撞，
+#           差 1.84mm → DRC 报短路）
+#     上界：最高孔 pad1 不能撞 VOICE(SW14) 180° 的 NPTH 定位孔 (79.85,48.00)
+#           —— 两者水平只差 1.12mm，需垂直错开 ≥1.47mm（孔Ø1.5+盘Ø1.7+间隙0.25）
+#   取本体 y[14.00, 47.00]：孔 y[15.26, 45.74]。
+#     · 最低孔 15.26 距 STOP 焊盘 3.33mm ✓
+#     · 最高孔 45.74 距 VOICE 定位孔中心 2.26mm ✓（余 0.79）
+#   USB 端在文档 y=47.00 → 外壳 y=57.4，内腔上壁内表面 68.4
+#     → 插头金属 6.5mm 够到（插头肩部落在 63.9，仍在内腔内 ✓）；
+#     ⚠️ 代价：肩部要伸进内腔，所以外壳上壁的开孔必须**能过插头胶壳**
+#     （约 10×8mm），不能只开金属大小的小孔。详见 case_bottom.scad usb_port()。
+#
+# ★★ 2026-10-11 排针由 1×12 改为 1×13（关键修正，原板已报废）
+#   实物一排是 **13 个引脚**，跨距 30.48mm（= 12 × 2.54）。
+#   原按 1×12 生成（跨距 27.94），导致 12 个孔相对 13 个引脚**每个都偏 1.27mm**
+#   （半个间距），而且还少一个孔 —— 主控根本插不上去，不是「少一个孔」那么轻。
+#   根因：把官方尺寸图的「30.48 引脚跨度」当成 12 针跨度（12 针应为 11 × 2.54 = 27.94）。
+#   三重依据（2026-10-11 核实）：
+#     ① 官方尺寸图像素标定：13 个焊盘、间距均匀 62px = 2.54mm、跨距 744px = 30.50mm；
+#        板框 805×434px 长宽比 1.855，对上 33.00/17.78 = 1.856（图是按比例画的）
+#     ② 官方引脚图每列 13 个信号名
+#     ③ 实物照片：USB 金属壳压住列首 3 个引脚，可见 10 个 + 隐藏 3 个 = 13
 MCU_X_L, MCU_X_R = 80.97, 96.21
-MCU_PAD_Y1 = 42.97          # 文档 y（pad1，USB 端）
+MCU_PAD_Y1 = 45.74          # 文档 y（pad1，USB 端）
 MCU_PAD_STEP = 2.54
-# net 映射（标准 Pro Micro 引脚序，USB 端起 pad1..pad12；★ 打板前对实物复核）
-JP1_NETS = [None, None, "GND", "GND", None, None,
-            "ROW1", "ROW2", "ROW3", "COL1", "COL2", "COL3"]   # D1 D0 GND GND D2 D3 D4..D9
-JP2_NETS = [None, "GND", "RST", None, None, None, None, None,
-            "RGB_DIN", "COL6", "COL5", "COL4"]                # RAW GND RST VCC 21 20 19 18 15 14 16 10
+# net 映射（★ 2026-10-11 按实物丝印逐字核对；USB 端起 pad1..pad13）
+#   左排 x=80.97：GND  D1  D0  GND  GND  D2  D3  D4  D5  D6  D7  D8  D9
+#   右排 x=96.21：B+   RAW GND RST  VCC  D21 D20 D19 D18 D15 D14 D16 D10
+#   （B+/RAW/VCC 不接：电池直接焊主控背面 B+/B− 焊盘）
+JP1_NETS = ["GND", None, None, "GND", "GND", None, None,
+            "ROW1", "ROW2", "ROW3", "COL1", "COL2", "COL3"]
+JP2_NETS = [None, None, "GND", "RST", None, None, None, None, None,
+            "RGB_DIN", "COL6", "COL5", "COL4"]
 
 # ---- 其他焊盘（spec §6.3 生成器自选位，注释=依据）----------------------------
 # 拨杆引线：缺口上缘附近（y>14 出 SW5 底座投影带 [78,92]×[0,14]），
@@ -267,10 +293,11 @@ def build():
                 pad.SetNet(net_for(board, netname))
 
     # ---- 主控本体轮廓（B.Fab，装配标注）----------------------------------
-    add_fab_rect(board, 79.70, 12.50, 97.48, 45.50)
+    # y 随两排孔整体上移（见文件头「y 位置第三/四轮校正」）
+    add_fab_rect(board, 79.70, 14.00, 97.48, 47.00)
     add_silk_text(board, "MCU on BACK (NoLogo ProMicro NRF52840)",
                   (58.0, 8.0))
-    add_silk_text(board, "USB -> RIGHT WALL", (78.0, 45.5))
+    add_silk_text(board, "USB -> +Y WALL (top)", (78.0, 45.5))
 
     # ---- 拨杆 / 复位 / D15 / 电源开关焊盘（1.5mm 孔 + 2.5mm 焊盘）---------
     aux = [
@@ -323,7 +350,9 @@ def verify(board, nl):
     W = nl["pcb"]["width"]
     ny0, ny1 = nl["pcb"]["notch_y0"], nl["pcb"]["notch_y1"]
     nd = nl["pcb"]["notch_depth"]
-    mcu = (79.70, 12.50, 97.48, 45.50)   # 主控本体（文档坐标）
+    mcu = (nl["mcu"]["pos"][0], nl["mcu"]["pos"][1],
+           nl["mcu"]["pos"][0] + nl["mcu"]["width"],
+           nl["mcu"]["pos"][1] + nl["mcu"]["length"])   # 主控本体（文档坐标）
 
     pads = []
     for fp in board.GetFootprints():
@@ -377,7 +406,23 @@ def verify(board, nl):
             if mcu[0] < p["x"] < mcu[2] and mcu[1] < p["y_doc"] < mcu[3]:
                 err(f"{p['ref']} NPTH 定位孔在主控区 ({p['x']},{p['y_doc']})")
 
-    # 5) 数量
+    # 5) ★ 主控排针孔数与跨距必须等于实物引脚
+    #    2026-10-11 新增。第一版按 1×12 生成（跨距 27.94），而实物是 13 脚
+    #    （跨距 30.48）→ 每个孔偏 1.27mm、还少一个孔，主控根本插不上去。
+    #    这条检查对着「厂商尺寸图给出的引脚跨距」断言，改错封装会立刻报错。
+    want_n, want_span = int(nl["mcu"]["pin_count"]), nl["mcu"]["pin_span"]
+    for ref in ("JP1", "JP2"):
+        ys = sorted(p["y_doc"] for p in pth if p["ref"] == ref)
+        span = (ys[-1] - ys[0]) if len(ys) > 1 else 0.0
+        if len(ys) != want_n:
+            err(f"{ref} 孔数 {len(ys)} ≠ 实物引脚数 {want_n}"
+                f"（跨距会是 {span:.2f}，实物 {want_span}）")
+        elif abs(span - want_span) > 0.05:
+            err(f"{ref} 孔跨距 {span:.2f} ≠ 实物引脚跨距 {want_span}")
+        else:
+            print(f"  {ref}: {len(ys)} 孔，跨距 {span:.2f}mm ✓ = 实物 {want_n} 脚")
+
+    # 6) 数量
     n_sw = sum(1 for p in pads if p["ref"].startswith("SW"))
     n_d = sum(1 for fp in board.GetFootprints() if fp.GetReference().startswith("D"))
     print(f"  轴体 pad 数: {n_sw}（期望 14×(4−省略)）；二极管: {n_d}（期望 12）")

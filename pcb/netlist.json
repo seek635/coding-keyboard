@@ -506,6 +506,23 @@
     }
   ],
   "total_switches": 14,
+  "mcu": {
+    "name": "NoLogo ProMicro NRF52840",
+    "width": 17.78,
+    "length": 33.0,
+    "height": 3.2,
+    "pin_count": 13.0,
+    "pin_pitch": 2.54,
+    "pin_span": 30.48,
+    "on_back": true,
+    "pos": [
+      79.7,
+      13.77
+    ],
+    "row_dx": 15.240000000000002,
+    "usb_side": "short-edge(+y)",
+    "pin_note": "每排 13 脚，跨距 30.48 = 12 × 2.54（★ 12 脚只有 11 个间距 = 27.94，第一版 PCB 就是错在这里）"
+  },
   "pcb": {
     "width": 98.0,
     "height": 50.0,
@@ -518,6 +535,6 @@
     "notch_length": 24.0,
     "notch_y0": 0.0,
     "notch_y1": 12.0,
-    "notch_note": "右侧开缺口让位给拨杆本体，纵向区间 [0, 17.5]（对准拨杆中心 y=5.6）"
+    "notch_note": "右侧开缺口让位给拨杆本体，纵向区间 [0, 12]（下缘截断；上缘受主控右排最低孔约束）"
   }
 }
