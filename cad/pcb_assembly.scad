@@ -36,22 +36,25 @@ C_SILVER = [0.75, 0.75, 0.78];
 C_BATT   = [0.76, 0.78, 0.80];
 C_RED    = [0.80, 0.20, 0.20];
 
-// ---------- 数据（与 placement.csv / gen_kicad.py 同源）----------
+// ---------- 数据（与 pcb/placement.csv / gen_kicad.py 同源）----------
+// ⚠️ 本表是**副本**：改板后必须同步（或直接看 docs/焊接参考图.html ——
+//    那个由 tools/render_assembly.py 从 placement.csv / 板文件生成，不会漂移）。
 // [键名, x, y, 旋转°]（文档坐标，y 向上）
 SWITCHES = [
     ["PERM", 13, 7, 0], ["UP", 31, 7, 0], ["MODEL", 49, 7, 0], ["CMD", 67, 7, 0], ["STOP", 85, 7, 270],
     ["LEFT", 13, 25, 0], ["DOWN", 31, 25, 0], ["RIGHT", 49, 25, 0], ["ENTER", 67, 25, 0], ["ENTER", 85, 25, 90],
-    // ★ 2026-10-11：空格由「跨列 1-4（13/40/67）」改为「跨列 2-4（31/49/67）」
-    ["SPACE", 31, 43, 0], ["SPACE", 49, 43, 0], ["SPACE", 67, 43, 0], ["VOICE", 85, 43, 180],
+    // ★ 2026-10-11（用户要求 · 第二次修正）：这一行 4 颗键贴左 —— 空格跨列 1-3（13/31/49），
+    //   语音键第 5 列 → 第 4 列（67）；第 5 列（85）空出，主控区不再被轴体压住。
+    ["SPACE", 13, 43, 0], ["SPACE", 31, 43, 0], ["SPACE", 49, 43, 0], ["VOICE", 67, 43, 180],
 ];
 // 二极管中心 [x, y]（色环端/阴极一律朝 x 小的一侧）
 DIODES = [
     [6, 16], [16.5, 16], [27, 16], [47.26, 16], [57.58, 16], [67.9, 16],
     [6, 34], [16.5, 34], [27, 34], [57.58, 34], [47.26, 34], [67.9, 34],
 ];
-JP_XS  = [80.97, 96.21];      // 排针两列
-JP_Y0  = 15.03;               // 首孔 y
-JP_N   = 12;
+JP_XS  = [78.03, 93.27];      // 排针两列（主控左缘 76.76 + 1.27 / 右缘 94.54 − 1.27）
+JP_Y0  = 14.82;               // 最低孔 y（= 主控 y0 13.56 + (33.00 − 30.48)/2）
+JP_N   = 13;                  // 每列 13 孔（跨距 30.48 = 12 × 2.54）
 
 // ---------- PCB 板（含右缘缺口）----------
 module pcb_board() {
@@ -92,17 +95,18 @@ module diode_1n4148(x, y) {
     }
 }
 
-// ---------- 排针（12 针一列，胶条已剪掉，只留金针）----------
+// ---------- 排针（13 针一列，胶条已剪掉，只留金针）----------
 module header_pins(x) {
     for (k = [0 : JP_N - 1])
         translate([x, JP_Y0 + k * 2.54, 1.8]) cube([0.64, 0.64, 3.6], center = true);
 }
 
-// ---------- 主控 NoLogo NRF52840（背面，元件面朝下，USB 朝 +x 右壁）----------
+// ---------- 主控 NoLogo NRF52840（背面，元件面朝下，USB-C 朝 +y 上壁）----------
+// 本体 x[76.76,94.54] y[13.56,46.56] → 中心 (85.65, 30.06)
 module promicro() {
-    translate([88.59, 29, -2.5]) {
+    translate([85.65, 30.06, -2.5]) {
         color(C_NAVY)   translate([0, 0, -0.8]) cube([17.78, 33, 1.6], center = true);
-        color(C_SILVER) translate([9.64, 0, -0.6]) cube([1.5, 9, 1.8], center = true);   // USB-C
+        color(C_SILVER) translate([0, 17.5, -0.6]) cube([9, 1.5, 1.8], center = true);   // USB-C（短边 +y）
         color(C_BLACK)  translate([-2, 4, -2.1]) cube([10, 10, 1], center = true);       // NRF 屏蔽罩
         color(C_SILVER) translate([4.5, -8, -1.95]) cube([3.2, 2, 0.7], center = true);  // 晶振
         color(C_GOLD) {
@@ -112,9 +116,9 @@ module promicro() {
     }
 }
 
-// ---------- 电池 403040（背面，顶面贴板底）----------
+// ---------- 电池 403040（背面，顶面贴板底；贴内腔左壁 x −2~28）----------
 module battery() {
-    translate([16, 25, -1.6]) {
+    translate([13, 25, -1.6]) {
         color(C_BATT) translate([0, 0, -2]) cube([30, 40, 4], center = true);
         color(C_RED)   translate([14.6, 2.5, -1.2]) cube([3, 1, 0.8], center = true);    // 红线（B+）
         color(C_BLACK) translate([14.6, -2.5, -1.2]) cube([3, 1, 0.8], center = true);   // 黑线（B-）
@@ -126,9 +130,10 @@ module pwr_switch() {           // 电源开关 doc(3,25)
     color(C_BLACK) translate([3, 25, 1.6]) cube([6, 3.2, 3.2], center = true);
     color(C_RED)   translate([3, 25, 3.8]) cube([1.2, 1.2, 1.4], center = true);
 }
-module reset_btn() {            // 复位按钮 doc(76,17)
-    color(C_BLACK) translate([76, 17, 1.2]) cube([4.4, 4.4, 2.4], center = true);
-    color(C_RED)   translate([76, 17, 3.0]) cube([2.2, 2.2, 1.2], center = true);
+module reset_btn() {            // 复位按钮飞线焊盘 doc：RST1(74,17) / GND1(74,13)
+    color(C_BLACK) translate([74, 17, 1.2]) cube([4.4, 4.4, 2.4], center = true);
+    color(C_RED)   translate([74, 17, 3.0]) cube([2.2, 2.2, 1.2], center = true);
+    color(C_GOLD)  translate([74, 13, 0.6]) cube([2.5, 2.5, 0.16], center = true);
 }
 module lever() {                // 审批拨杆（实际装外壳右壁，此处浮在缺口示意）doc(96,5.6)
     color(C_BLACK)  translate([96, 5.6, 0]) cube([8.5, 13, 4], center = true);
@@ -167,7 +172,7 @@ if (VIEW == "in_case") {
 echo("══════ ClaudePad 焊接步骤 ══════");
 echo(str("STEP=", STEP, "  ", STEP == 0 ? "裸板" :
          STEP == 1 ? "① 二极管×12（色环朝左）" :
-         STEP == 2 ? "② 排针×24（剪胶条）+ 主控（背面）" :
+         STEP == 2 ? "② 排针×26（剪胶条）+ 主控（背面）" :
          STEP == 3 ? "③ 飞线：电池/电源开关/复位按钮" :
-         STEP == 4 ? "④ 轴体×14（含 ENTER②/VOICE 180°）" :
+         STEP == 4 ? "④ 轴体×14（含 STOP 270° / ENTER② 90° / VOICE 180°）" :
                      "⑤ 拨杆（装外壳右壁）→ 完成"));

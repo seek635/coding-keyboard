@@ -12,43 +12,106 @@
 重跑命令（数据改动后）：
   C:\\Users\\尚\\AppData\\Local\\Programs\\Python\\Python312\\python.exe tools/render_assembly.py
 
-数据来源（勿在本文件里"改坐标"，改源头）：
-  轴体/二极管  <- pcb/placement.csv      （tools/gen_pcb.py 生成）
-  排针/主控    <- tools/gen_kicad.py 头注释（本体 y[14.00,47.00]，孔 y 15.26~45.74，13 孔）
+数据来源（★ 本文件不写死任何坐标，全部读生成物 —— 改坐标请改源头）：
+  轴体/二极管  <- pcb/placement.csv       （tools/gen_pcb.py 生成）
+  主控/排针    <- cad/lib/params.scad     （NANO_* / NANO_PIN_*）
+  飞线焊盘     <- pcb/claudepad.kicad_pcb （取 RST1/GND1/RGB1/PWR1/PWR2/LEV1/LEV2 的真实坐标）
   板框/缺口    <- cad/lib/params.scad §4
+
+★ 2026-10-11（用户第二次改板）：原先这里写死了一整份坐标副本（板宽 98、JP 80.97/96.21、
+  NANO 79.70、空格 31/49/67…）。改板后它继续画**旧板子** —— 正是本项目的老教训
+  「展示层会自信地展示错误信息」。已全部改为读生成物；同时修掉俯视图只按 180° 镜像、
+  把 STOP(270°)/ENTER(90°) 的孔画错位置的 bug。
 """
 import math
 import os
+import re
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+from scad_params import load as load_params        # noqa: E402
+
+P = load_params()
+BOARD = os.path.join(ROOT, "pcb", "claudepad.kicad_pcb")
+PLACEMENT = os.path.join(ROOT, "pcb", "placement.csv")
 
 C = math.cos(math.radians(30.0))
 S = 0.5
 
-# ---------------- 数据（与 placement.csv / gen_kicad.py 同源） ----------------
-PCB_W, PCB_H, PCB_T = 98.0, 50.0, 1.6
-NOTCH = (90.0, 0.0, 98.0, 12.0)          # 右缘缺口 x[90,98] y[0,12]（拨杆让位）
 
-# (键名, x, y, 旋转°)  文档坐标系：原点=板左下角，y 向上
-SWITCHES = [
-    ("PERM", 13, 7, 0), ("UP", 31, 7, 0), ("MODEL", 49, 7, 0), ("CMD", 67, 7, 0), ("STOP", 85, 7, 270),
-    ("LEFT", 13, 25, 0), ("DOWN", 31, 25, 0), ("RIGHT", 49, 25, 0), ("ENTER", 67, 25, 0), ("ENTER", 85, 25, 90),
-    # ★ 2026-10-11：空格跨列 1-4 → 2-4（31/49/67）；STOP 0°→270°、ENTER(2) 180°→90°（用户要求孔竖着）
-    ("SPACE", 31, 43, 0), ("SPACE", 49, 43, 0), ("SPACE", 67, 43, 0), ("VOICE", 85, 43, 180),
-]
-# (位号, x, y, 键名)  色环端（阴极→ROW）一律朝 x 小的一侧
-DIODES = [
-    ("D1", 6.00, 16.00, "PERM"), ("D2", 16.50, 16.00, "UP"), ("D3", 27.00, 16.00, "MODEL"),
-    ("D4", 47.26, 16.00, "CMD"), ("D5", 57.58, 16.00, "STOP"), ("D6", 67.90, 16.00, "APPROVE"),
-    ("D7", 6.00, 34.00, "LEFT"), ("D8", 16.50, 34.00, "DOWN"), ("D9", 27.00, 34.00, "RIGHT"),
-    ("D10", 57.58, 34.00, "ENTER"), ("D11", 47.26, 34.00, "SPACE"), ("D12", 67.90, 34.00, "VOICE"),
-]
-# 飞线焊盘（与 tools/gen_kicad.py PAD_* 常量一致；label_side: L=文字在左 R=在右）
-PADS = [("LEV1", 89, 16.5, "R"), ("LEV2", 85.5, 15.8, "R"), ("RST1", 74, 17, "L"),
-        ("GND1", 78, 17, "L"), ("RGB1", 76, 22, "L"), ("PWR1", 3, 23, "R"), ("PWR2", 3, 27, "R")]
-JP_XS = (80.97, 96.21)                    # 排针两列 x
-# ★ 2026-10-11：一排 13 孔、跨距 30.48（原 12 孔 / 27.94）
-JP_Y0, JP_N, JP_PITCH = 15.26, 13, 2.54   # 最低孔 y / 每列孔数 / 孔距
-NANO = (79.70, 14.00, 97.48, 47.00)       # 主控（背面）x0,y0,x1,y1
-BATT = (1.0, 5.0, 31.0, 45.0)             # 电池（背面，示意）
+# ---------------- 数据（全部来自生成物） ----------------
+def _load_placement():
+    """读 pcb/placement.csv → (轴体, 二极管)。轴体=(键名,x,y,旋转°)，二极管=(位号,x,y,键名)"""
+    sw, dio, section = [], [], None
+    with open(PLACEMENT, encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("ref,type,label,"):
+                section = "sw"
+                continue
+            if line.startswith("ref,type,matrix,"):
+                section = "dio"
+                continue
+            p = line.split(",")
+            if section == "sw" and p[1] == "switch":
+                sw.append((p[2], float(p[4]), float(p[5]), float(p[8] or 0)))
+            elif section == "dio" and p[1] == "diode":
+                dio.append((p[0], float(p[3]), float(p[4]), p[7] if len(p) > 7 else ""))
+    return sw, dio
+
+
+def _load_board_items():
+    """读 pcb/claudepad.kicad_pcb，返回 {位号: (x_doc, y_doc, 旋转)}"""
+    text = open(BOARD, encoding="utf-8").read()
+    items, i, n = {}, 0, len(text)
+    while True:
+        i = text.find("(footprint", i)
+        if i < 0:
+            break
+        j, d = i, 0
+        while j < n:
+            if text[j] == "(":
+                d += 1
+            elif text[j] == ")":
+                d -= 1
+                if d == 0:
+                    break
+            j += 1
+        block = text[i:j + 1]
+        mref = re.search(r'\(property "Reference" "([^"]+)"', block)
+        mat = re.search(r"\n\t\t\(at ([-\d.]+) ([-\d.]+)(?: ([-\d.]+))?\)", block)
+        if mref and mat:
+            items[mref.group(1)] = (float(mat.group(1)),
+                                    P["PCB_H"] - float(mat.group(2)),
+                                    float(mat.group(3) or 0))
+        i = j + 1
+    return items
+
+
+PCB_W, PCB_H, PCB_T = P["PCB_W"], P["PCB_H"], P["PCB_T"]
+NOTCH = (PCB_W - P["PCB_NOTCH_D"], P["PCB_NOTCH_Y0"], PCB_W, P["PCB_NOTCH_Y1"])
+
+SWITCHES, DIODES = _load_placement()
+_ITEMS = _load_board_items()
+
+# 飞线焊盘（坐标取板文件真值；label_side: L=文字在左 R=在右）
+PADS = [(ref, _ITEMS[ref][0], _ITEMS[ref][1], side)
+        for ref, side in (("LEV1", "R"), ("LEV2", "R"), ("RST1", "L"), ("GND1", "L"),
+                          ("RGB1", "L"), ("PWR1", "R"), ("PWR2", "R"))
+        if ref in _ITEMS]
+
+# 排针两列 / 最低孔 y / 每列孔数 —— 全部由 params 推导
+JP_XS = (_ITEMS["JP1"][0], _ITEMS["JP2"][0])
+JP_N = int(P["NANO_PIN_COUNT"])
+JP_PITCH = float(P["NANO_PIN_PITCH"])
+JP_Y0 = P["NANO_POS_Y"] + (P["NANO_L"] - P["NANO_PIN_SPAN"]) / 2.0
+NANO = (P["NANO_POS_X"], P["NANO_POS_Y"],
+        P["NANO_POS_X"] + P["NANO_W"], P["NANO_POS_Y"] + P["NANO_L"])
+BATT = (0.0, (PCB_H - P["BATT_L"]) / 2.0, P["BATT_W"], (PCB_H + P["BATT_L"]) / 2.0)
 
 # 板框多边形（含缺口），顺时针
 BOARD_POLY = [(0, 0), (NOTCH[0], 0), (NOTCH[0], NOTCH[3]),
@@ -150,16 +213,17 @@ def render_iso(mirror=False, show_back=False):
         def back_box(x0, y0, x1, y1, h, col):
             iso_box(out, x0, y0, 0.0, x1, y1, h, col, ox, oy, sc, True)
         back_box(*NANO, 3.2, "#1e3a5f")
-        back_box(96.4, 26, 98.3, 35, 2.6, "#b9bec6")                     # USB-C
+        # USB-C 在主控**短边（文档 +y，外壳上壁）**，不是右壁
+        back_box(NANO[0] + 4.5, NANO[3], NANO[0] + 13.5, NANO[3] + 2.4, 2.6, "#b9bec6")
         back_box(*BATT, 4.0, "#c0c4c8")
         tx, ty = iso_pt((NANO[0] + NANO[2]) / 2, (NANO[1] + NANO[3]) / 2, 6.5, ox, oy, sc, True)
         out.append(f'<text x="{tx:.0f}" y="{ty:.0f}" text-anchor="middle" font-size="12" fill="#cfe3ff">主控 NoLogo NRF52840（元件面朝下）</text>')
         tx, ty = iso_pt((BATT[0] + BATT[2]) / 2, (BATT[1] + BATT[3]) / 2, 7.3, ox, oy, sc, True)
         out.append(f'<text x="{tx:.0f}" y="{ty:.0f}" text-anchor="middle" font-size="12" fill="#f2f3f5">电池（示意）</text>')
         tx, ty = iso_pt(NANO[2] + 4, 30.5, 1.2, ox, oy, sc, True)
-        out.append(f'<text x="{tx:.0f}" y="{ty:.0f}" text-anchor="middle" font-size="11" fill="#f2f3f5">USB-C 朝右壁</text>')
+        out.append(f'<text x="{tx:.0f}" y="{ty:.0f}" text-anchor="middle" font-size="11" fill="#f2f3f5">USB-C 朝上壁（短边）</text>')
         out.append(f'<text x="80" y="40" font-size="15" fill="#9fc4e8">背面视图（左右已镜像 = 从板底往上看）</text>')
-        out.append(f'<text x="80" y="62" font-size="12" fill="#8b93a3">主控套在 24 根排针脚上再焊 · 电池红线→电源开关→B+，黑线→B-</text>')
+        out.append(f'<text x="80" y="62" font-size="12" fill="#8b93a3">主控套在 {2 * JP_N} 根排针脚上再焊 · 电池红线→电源开关→B+，黑线→B-</text>')
     out.append("</svg>")
     return "\n".join(out)
 
@@ -173,17 +237,21 @@ def render_top():
            f'<rect width="{W}" height="{H}" fill="#14161a"/>']
     poly = " ".join(f"{X(x):.0f},{Y(y):.0f}" for x, y in BOARD_POLY)
     out.append(f'<polygon points="{poly}" fill="#2f7d4a" stroke="#6fae86" stroke-width="2"/>')
-    # 轴体
+    # 轴体（孔位按真实旋转角算 —— 原先只做 180° 镜像，STOP/ENTER 转过的角度会画错）
+    PIN_OFFSETS = ((-3.80, 4.93), (-5.90, 0.00), (5.15, -5.00))   # Choc V2：2 电气 + 1 定位
     for label, x, y, rot in SWITCHES:
-        fx = -1 if rot == 180 else 1
         out.append(f'<rect x="{X(x-7.5):.0f}" y="{Y(y+7.5):.0f}" width="{15*sc:.0f}" height="{15*sc:.0f}" '
                    f'rx="4" fill="#33333d" stroke="#5a5a68"/>')
         out.append(f'<text x="{X(x):.0f}" y="{Y(y)+4:.0f}" text-anchor="middle" font-size="12" fill="#fff">{label}</text>')
-        for dx, dy in ((-3.8, 4.93), (-5.9, 0.0), (5.15, -5.0)):
-            hx, hy = X(x + fx * dx), Y(y + fx * dy)
+        out.append(f'<circle cx="{X(x):.1f}" cy="{Y(y):.1f}" r="{2.5*sc:.1f}" fill="#1b1b20" '
+                   f'stroke="#6b6b78" stroke-width="1"/>')          # 中心孔 Ø5（NPTH）
+        th = math.radians(rot)
+        ct, st = math.cos(th), math.sin(th)
+        for dx, dy in PIN_OFFSETS:
+            hx, hy = x + dx * ct - dy * st, y + dx * st + dy * ct
             anchor = (dx, dy) == (5.15, -5.0)
-            out.append(f'<circle cx="{hx:.1f}" cy="{hy:.1f}" r="{0.8*sc:.1f}" fill="{"none" if anchor else "#d4af37"}" '
-                       f'stroke="#d4af37" stroke-width="1.2"/>')
+            out.append(f'<circle cx="{X(hx):.1f}" cy="{Y(hy):.1f}" r="{0.8*sc:.1f}" '
+                       f'fill="{"none" if anchor else "#d4af37"}" stroke="#d4af37" stroke-width="1.2"/>')
     # 二极管（位号印在管身里，色环=左端深色块）
     for ref, x, y, key in DIODES:
         out.append(f'<rect x="{X(x-4):.1f}" y="{Y(y+1.3):.1f}" width="{8*sc:.1f}" height="{2.6*sc:.1f}" '
@@ -192,9 +260,10 @@ def render_top():
         out.append(f'<text x="{X(x):.0f}" y="{Y(y)+4:.0f}" text-anchor="middle" font-size="10" fill="#1c1c20">{ref}</text>')
     # 排针区（标签放板上缘外，避免压住轴体方块）
     for i, colx in enumerate(JP_XS):
-        out.append(f'<rect x="{X(colx-1.27):.1f}" y="{Y(43.5):.1f}" width="{2.54*sc:.1f}" height="{29.5*sc:.1f}" '
-                   f'fill="#17171a" stroke="#3c3c46"/>')
-        out.append(f'<text x="{X(colx):.0f}" y="48" text-anchor="middle" font-size="11" fill="#9fd6ae">JP{i+1} ×12 针 ↓</text>')
+        y_hi = JP_Y0 + (JP_N - 1) * JP_PITCH
+        out.append(f'<rect x="{X(colx-1.27):.1f}" y="{Y(y_hi):.1f}" width="{2.54*sc:.1f}" '
+                   f'height="{(y_hi-JP_Y0)*sc:.1f}" fill="#17171a" stroke="#3c3c46"/>')
+        out.append(f'<text x="{X(colx):.0f}" y="48" text-anchor="middle" font-size="11" fill="#9fd6ae">JP{i+1} ×{JP_N} 针 ↓</text>')
     # 飞线焊盘
     for name, x, y, side in PADS:
         out.append(f'<circle cx="{X(x):.1f}" cy="{Y(y):.1f}" r="{0.75*sc:.1f}" fill="#d4af37" stroke="#fff" stroke-width="0.8"/>')

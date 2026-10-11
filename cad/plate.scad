@@ -31,15 +31,20 @@ function key_axis_pos(c, r, u, i) = [
 
 // ---------- 单个轴孔 ------------------------------------------------------
 // Choc 轴孔：主方孔 + 左右两个侧卡扣槽
+// ★ 2026-10-11 修 bug：原先 extrude 用 center = true，调用处又 translate z=-1，
+//   结果切槽只覆盖 z[-2.6, 0.6]，而板厚是 [0, 1.2] —— **顶面留了 0.6mm 皮没切穿**。
+//   渲染出来是「实心板 + 4 个螺丝孔」，轴体根本插不进去。
+//   现在改为：从 z = -1 起 extrude，高度 PLATE_T + 2，调用处不再偏移。
 module choc_cutout() {
     s = SWITCH_CUTOUT + SWITCH_CUTOUT_TOL;
-    linear_extrude(height = PLATE_T + 2, center = true) {
-        square([s, s], center = true);
-        for (sx = [-1, 1]) {
-            translate([sx * (s / 2 + SWITCH_CLIP_H / 2), 0])
-                square([SWITCH_CLIP_H * 2, SWITCH_CLIP_W], center = true);
+    translate([0, 0, -1])
+        linear_extrude(height = PLATE_T + 2) {
+            square([s, s], center = true);
+            for (sx = [-1, 1]) {
+                translate([sx * (s / 2 + SWITCH_CLIP_H / 2), 0])
+                    square([SWITCH_CLIP_H * 2, SWITCH_CLIP_W], center = true);
+            }
         }
-    }
 }
 
 // ---------- 定位板本体 ----------------------------------------------------
@@ -50,12 +55,12 @@ module switch_plate() {
             offset(r = CAP_TOP_R) offset(delta = -CAP_TOP_R)
                 square([PLATE_W, PLATE_H]);
 
-        // 所有轴孔
+        // 所有轴孔（choc_cutout 自带 z = -1 起的 1mm 余量，这里不要再偏移）
         for (k = KEYMAP) {
             c = k[0]; r = k[1]; u = k[2];
             for (i = [0 : axis_count(u) - 1]) {
                 p = key_axis_pos(c, r, u, i);
-                translate([p[0], p[1], -1]) choc_cutout();
+                translate([p[0], p[1], 0]) choc_cutout();
             }
         }
 

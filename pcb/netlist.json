@@ -108,7 +108,8 @@
       "pin": "D7",
       "keys": [
         "PERM",
-        "LEFT"
+        "LEFT",
+        "SPACE"
       ]
     },
     {
@@ -116,8 +117,7 @@
       "pin": "D8",
       "keys": [
         "UP",
-        "DOWN",
-        "SPACE"
+        "DOWN"
       ]
     },
     {
@@ -133,15 +133,15 @@
       "pin": "D10",
       "keys": [
         "CMD",
-        "ENTER"
+        "ENTER",
+        "VOICE"
       ]
     },
     {
       "name": "COL5",
       "pin": "D16",
       "keys": [
-        "STOP",
-        "VOICE"
+        "STOP"
       ]
     },
     {
@@ -416,15 +416,19 @@
     {
       "label": "SPACE",
       "row": 3,
-      "col": 2,
+      "col": 1,
       "width_u": 3,
       "switches": 3,
       "net_row": "ROW3",
-      "net_col": "COL2",
+      "net_col": "COL1",
       "pin_row": "D6",
-      "pin_col": "D8",
+      "pin_col": "D7",
       "diode": "1N4148",
       "positions": [
+        [
+          15.0,
+          51.0
+        ],
         [
           33.0,
           51.0
@@ -432,23 +436,19 @@
         [
           51.0,
           51.0
-        ],
-        [
-          69.0,
-          51.0
         ]
       ],
       "pcb_positions": [
+        [
+          13.0,
+          43.0
+        ],
         [
           31.0,
           43.0
         ],
         [
           49.0,
-          43.0
-        ],
-        [
-          67.0,
           43.0
         ]
       ],
@@ -460,23 +460,23 @@
     {
       "label": "VOICE",
       "row": 3,
-      "col": 5,
+      "col": 4,
       "width_u": 1,
       "switches": 1,
       "net_row": "ROW3",
-      "net_col": "COL5",
+      "net_col": "COL4",
       "pin_row": "D6",
-      "pin_col": "D16",
+      "pin_col": "D10",
       "diode": "1N4148",
       "positions": [
         [
-          87.0,
+          69.0,
           51.0
         ]
       ],
       "pcb_positions": [
         [
-          85.0,
+          67.0,
           43.0
         ]
       ],

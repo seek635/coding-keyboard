@@ -167,7 +167,7 @@ python tools/export_stl.py
 | `02_plate.stl` | 定位板 | PLA |
 | `03_keycap_1u.stl` | 键帽（打 9 个） | PLA |
 | `04_keycap_2u.stl` | 回车键帽 | PLA |
-| `05_keycap_4u.stl` | 空格键帽 | PLA |
+| `05_keycap_3u.stl` | 空格键帽 | PLA |
 
 **导出后务必校验**：
 
@@ -186,7 +186,7 @@ python tools/verify_stl.py
 |---|---|---|---|
 | ① | `00_test_coupon.stl` | **轴体卡扣间隙** | 15 min |
 | ② | `02_plate.stl` | 轴孔松紧 | 40 min |
-| ③ | `05_keycap_4u.stl` | 三轴支撑手感 | 35 min |
+| ③ | `05_keycap_3u.stl` | 三轴支撑手感 | 35 min |
 | ④ | `01_case_bottom.stl` | 孔位与装配 | 3–4 h |
 
 ---
@@ -212,7 +212,7 @@ OSC=~/openscad-portable/openscad-2021.01/openscad.com
 | `case_iso.png` | 底座内部结构 |
 | `side_90.png` | 右壁正视图（拨杆孔 + USB 开口） |
 | `plate.png` | 定位板 |
-| `keycap4u_bottom.png` | 4u 空格底面 —— 可见 3 个榫头柱与 3 条加强筋 |
+| `keycap4u_bottom.png` | 3u 空格底面 —— 可见 3 个榫头柱与 3 条加强筋 |
 
 ---
 
