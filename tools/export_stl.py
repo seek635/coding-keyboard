@@ -67,7 +67,7 @@ JOBS = [
     ("plate.scad",       "02_plate.stl",       []),
     ("keycap.scad",      "03_keycap_1u.stl",   ["-D", 'keycap_mode="1u"']),
     ("keycap.scad",      "04_keycap_2u.stl",   ["-D", 'keycap_mode="2u"']),
-    ("keycap.scad",      "05_keycap_4u.stl",   ["-D", 'keycap_mode="4u"']),
+    ("keycap.scad",      "05_keycap_3u.stl",   ["-D", 'keycap_mode="3u"']),
 ]
 
 

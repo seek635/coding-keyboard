@@ -108,8 +108,7 @@
       "pin": "D7",
       "keys": [
         "PERM",
-        "LEFT",
-        "SPACE"
+        "LEFT"
       ]
     },
     {
@@ -117,7 +116,8 @@
       "pin": "D8",
       "keys": [
         "UP",
-        "DOWN"
+        "DOWN",
+        "SPACE"
       ]
     },
     {
@@ -416,21 +416,21 @@
     {
       "label": "SPACE",
       "row": 3,
-      "col": 1,
-      "width_u": 4,
+      "col": 2,
+      "width_u": 3,
       "switches": 3,
       "net_row": "ROW3",
-      "net_col": "COL1",
+      "net_col": "COL2",
       "pin_row": "D6",
-      "pin_col": "D7",
+      "pin_col": "D8",
       "diode": "1N4148",
       "positions": [
         [
-          15.0,
+          33.0,
           51.0
         ],
         [
-          42.0,
+          51.0,
           51.0
         ],
         [
@@ -440,11 +440,11 @@
       ],
       "pcb_positions": [
         [
-          13.0,
+          31.0,
           43.0
         ],
         [
-          40.0,
+          49.0,
           43.0
         ],
         [
@@ -508,7 +508,7 @@
   "total_switches": 14,
   "switch_rot": {
     "STOP|0": 270.0,
-    "ENTER|1": 180.0,
+    "ENTER|1": 90.0,
     "VOICE|0": 180.0
   },
   "mcu": {
@@ -521,8 +521,8 @@
     "pin_span": 30.48,
     "on_back": true,
     "pos": [
-      80.11,
-      12.26
+      76.76,
+      13.56
     ],
     "row_dx": 15.240000000000002,
     "usb_side": "short-edge(+y)",

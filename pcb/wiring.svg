@@ -2,8 +2,8 @@
 <rect width="100%" height="100%" fill="#ffffff"/>
 <text x="40.0" y="46.0" font-size="24" fill="#111827" text-anchor="start" font-weight="600">ClaudePad 接线图 · 3 行 × 6 列矩阵</text>
 <text x="40.0" y="74.0" font-size="14" fill="#6b7280" text-anchor="start">二极管方向 col2row：阳极接列、阴极接行，电流 列 → 行 ｜ 由 tools/gen_pcb.py 生成</text>
-<line x1="300.0" y1="150.0" x2="300.0" y2="642.0" stroke="#dc2626" stroke-width="2.5"/>
-<line x1="450.0" y1="150.0" x2="450.0" y2="492.0" stroke="#dc2626" stroke-width="2.5"/>
+<line x1="300.0" y1="150.0" x2="300.0" y2="492.0" stroke="#dc2626" stroke-width="2.5"/>
+<line x1="450.0" y1="150.0" x2="450.0" y2="642.0" stroke="#dc2626" stroke-width="2.5"/>
 <line x1="600.0" y1="150.0" x2="600.0" y2="492.0" stroke="#dc2626" stroke-width="2.5"/>
 <line x1="750.0" y1="150.0" x2="750.0" y2="492.0" stroke="#dc2626" stroke-width="2.5"/>
 <line x1="900.0" y1="150.0" x2="900.0" y2="642.0" stroke="#dc2626" stroke-width="2.5"/>
@@ -131,16 +131,16 @@
 <line x1="909.0" y1="441.0" x2="891.0" y2="459.0" stroke="#d1d5db" stroke-width="2"/>
 <line x1="1041.0" y1="441.0" x2="1059.0" y2="459.0" stroke="#d1d5db" stroke-width="2"/>
 <line x1="1059.0" y1="441.0" x2="1041.0" y2="459.0" stroke="#d1d5db" stroke-width="2"/>
-<rect x="287.0" y="503.0" width="26.0" height="44.0" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
-<line x1="300.0" y1="501.0" x2="300.0" y2="514.0" stroke="#dc2626" stroke-width="2"/>
-<polygon points="292.0,514.0 308.0,514.0 300.0,528.0" fill="#dc2626" stroke="none" stroke-width="1"/>
-<line x1="292.0" y1="528.0" x2="308.0" y2="528.0" stroke="#dc2626" stroke-width="2.8"/>
-<line x1="300.0" y1="528.0" x2="300.0" y2="547.0" stroke="#2563eb" stroke-width="2"/>
-<rect x="248.0" y="570.0" width="104.0" height="60.0" rx="9" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
-<text x="300.0" y="596.0" font-size="14" fill="#111827" text-anchor="middle" font-weight="600">SPACE</text>
-<text x="300.0" y="614.0" font-size="11" fill="#16a34a" text-anchor="middle">3 轴并联</text>
-<line x1="441.0" y1="591.0" x2="459.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>
-<line x1="459.0" y1="591.0" x2="441.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>
+<line x1="291.0" y1="591.0" x2="309.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>
+<line x1="309.0" y1="591.0" x2="291.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>
+<rect x="437.0" y="503.0" width="26.0" height="44.0" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="450.0" y1="501.0" x2="450.0" y2="514.0" stroke="#dc2626" stroke-width="2"/>
+<polygon points="442.0,514.0 458.0,514.0 450.0,528.0" fill="#dc2626" stroke="none" stroke-width="1"/>
+<line x1="442.0" y1="528.0" x2="458.0" y2="528.0" stroke="#dc2626" stroke-width="2.8"/>
+<line x1="450.0" y1="528.0" x2="450.0" y2="547.0" stroke="#2563eb" stroke-width="2"/>
+<rect x="398.0" y="570.0" width="104.0" height="60.0" rx="9" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+<text x="450.0" y="596.0" font-size="14" fill="#111827" text-anchor="middle" font-weight="600">SPACE</text>
+<text x="450.0" y="614.0" font-size="11" fill="#16a34a" text-anchor="middle">3 轴并联</text>
 <line x1="591.0" y1="591.0" x2="609.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>
 <line x1="609.0" y1="591.0" x2="591.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>
 <line x1="741.0" y1="591.0" x2="759.0" y2="609.0" stroke="#d1d5db" stroke-width="2"/>

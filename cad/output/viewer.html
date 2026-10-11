@@ -166,7 +166,7 @@ const PARTS = [
 ];
 
 // 键帽按宽度分三个 STL，但每个键帽位置不同
-const CAP_FILES = { 1: '03_keycap_1u.stl', 2: '04_keycap_2u.stl', 4: '05_keycap_4u.stl' };
+const CAP_FILES = { 1: '03_keycap_1u.stl', 2: '04_keycap_2u.stl', 3: '05_keycap_3u.stl' };
 KEYMAP.forEach(([c, r, u, label]) => {
   PARTS.push({
     file: CAP_FILES[u], name: '键帽 ' + label, color: COLORS.cap,

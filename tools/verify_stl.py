@@ -45,7 +45,8 @@ def expected_boxes(P):
         "02_plate.stl":       (plate_w, plate_h, P["PLATE_T"]),
         "03_keycap_1u.stl":   (P["PITCH"] - 0.40, P["PITCH"] - 0.40, P["CAP_H"]),
         "04_keycap_2u.stl":   (P["PITCH"] * 2 - 0.40, P["PITCH"] - 0.40, P["CAP_H"]),
-        "05_keycap_4u.stl":   (P["PITCH"] * 4 - 0.40, P["PITCH"] - 0.40, P["CAP_H"]),
+        # ★ 2026-10-11：空格键帽由 4u 改 3u（跨列 2-4），文件名随之改为 05_keycap_3u.stl
+        "05_keycap_3u.stl":   (P["PITCH"] * 3 - 0.40, P["PITCH"] - 0.40, P["CAP_H"]),
     }
 
 
@@ -146,6 +147,16 @@ def main():
 
     if not files:
         print(f"❌ {OUT} 下没有 STL 文件。先跑：python tools/export_stl.py")
+        return 1
+
+    # ★ 2026-10-11 新增反向检查：清单里期望的文件必须真的存在。
+    #   本脚本只遍历「输出目录里实际有的文件」，所以改名/少导一个文件时它会**静默通过** ——
+    #   空格键帽从 4u 改 3u 时就踩过：文件改名了，校验却报「全部通过」。
+    have = {os.path.basename(f) for f in files}
+    missing = [n for n in expect if n not in have]
+    if missing:
+        print(f"❌ 输出目录缺少校验清单里的文件：{', '.join(missing)}")
+        print("   多半是改名后没同步 tools/export_stl.py，或 STL 没重新导出")
         return 1
 
     print("=" * 76)

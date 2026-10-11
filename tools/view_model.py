@@ -32,7 +32,7 @@ VIEWER = os.path.join(OUT, "viewer.html")
 
 REQUIRED_STL = [
     "01_case_bottom.stl", "02_plate.stl",
-    "03_keycap_1u.stl", "04_keycap_2u.stl", "05_keycap_4u.stl",
+    "03_keycap_1u.stl", "04_keycap_2u.stl", "05_keycap_3u.stl",
 ]
 
 
