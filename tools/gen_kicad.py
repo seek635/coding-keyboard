@@ -106,10 +106,13 @@ PAD_D15 = (76.0, 22.0)          # net RGB_DIN
 # 电源开关：飞线转接件（开关引脚焊住，电池+/VBAT 走飞线，PCB 无网络需求）→ 无 net
 PAD_PWR_SW = [(3.0, 23.0), (3.0, 27.0)]
 
-# NPTH 定位孔省略清单（孔位无法避开主控区/缺口 → 定位脚悬空，机械靠定位板卡扣）：
-#   ("ENTER",1) = (85,25) 180°：NPTH 落主控区，4 个正交角均避不开
-#   ("STOP",0)  = (85,7)  0°：  NPTH (90.15,2) 落入缺口区（x≥90）
-NPTH_SKIP = {("ENTER", 1), ("STOP", 0)}
+# NPTH 定位孔省略清单：
+# ★ 2026-10-11：原为 {("ENTER",1), ("STOP",0)}。逐角度穷举后：
+#   · STOP 转到 270° 后 4 个孔都能打 → 从清单移除 ✓
+#   · ENTER(2) 仍是**几何无解**：4 个旋转角下的 4 个特征，总有一个要么撞左排孔
+#     （x=80.97，与轴体中心只差 4.03mm，而轴体脚伸到 ±5.90）、要么落到板外。
+#     → 保留省孔，装配时剪掉该轴体的定位脚（焊接指南已注明）。
+NPTH_SKIP = {("ENTER", 1)}
 
 ERRS = []
 WARNS = []
@@ -247,7 +250,7 @@ def build():
     for k in sorted(nl["keys"], key=lambda x: (x["row"], x["col"])):
         for i, (x, y) in enumerate(k.get("pcb_positions") or []):
             sw_n += 1
-            rot_doc = nl_switch_rot(k["label"], i)
+            rot_doc = nl_switch_rot(nl, k["label"], i)
             skip = {2} if (k["label"], i) in NPTH_SKIP else set()
             make_choc_fp(board, f"SW{sw_n}", (x, y), rot_doc,
                          (k["net_col"], k["net_row"]), skip)
@@ -337,11 +340,9 @@ def build():
     return board, nl
 
 
-def nl_switch_rot(label, idx):
-    """从 gen_pcb.py 的 SWITCH_ROT 语义读取（文档视角逆时针）。"""
-    # 与 gen_pcb.py 保持一致的硬拷贝（避免 import 装饰器开销）；改动需两处同步
-    table = {("STOP", 0): 0.0, ("ENTER", 1): 180.0, ("VOICE", 0): 180.0}
-    return table.get((label, idx), 0.0)
+def nl_switch_rot(nl, label, idx):
+    """轴体旋转角（文档视角逆时针）—— 从 netlist.json 读，不再硬拷贝一份表。"""
+    return nl.get("switch_rot", {}).get(f"{label}|{idx}", 0.0)
 
 
 # ============================== 自检（纯数据）================================
@@ -399,12 +400,16 @@ def verify(board, nl):
         if p["x"] < 0 or p["x"] > W or p["y_doc"] < 0 or p["y_doc"] > H:
             err(f"{p['ref']}.{p['num']} 出板 ({p['x']},{p['y_doc']})")
 
-    # 4) NPTH 定位孔（drill<3，不含中心让位孔）不得在主控区——
-    #    定位脚会顶到背面主控板体；中心孔 Ø5 是凸台让位孔，凸台不长穿，允许在主控区
+    # 4) NPTH 定位孔在主控区 → **降级为警告**（2026-10-11 改）
+    #    原为错误。但现在轴体必须有完整的 4 个孔才能装进去（少一个孔 = 少一条腿），
+    #    而 x=85 那一列的定位脚无论怎么转都可能落在主控投影内。
+    #    结论：孔照打，靠「主控垫高」解决高度冲突（板下 5.0 − 主控 3.2 = 1.8mm 余量，
+    #    详见 docs/PCB设计规格书.md 与焊接指南的装配说明）。
     for p in pads:
         if p["npth"] and p["ref"].startswith("SW") and p["drill"] < 3:
             if mcu[0] < p["x"] < mcu[2] and mcu[1] < p["y_doc"] < mcu[3]:
-                err(f"{p['ref']} NPTH 定位孔在主控区 ({p['x']},{p['y_doc']})")
+                warn(f"{p['ref']} 定位孔在主控投影内 ({p['x']},{p['y_doc']})"
+                     f" —— 需主控垫高避让")
 
     # 5) ★ 主控排针孔数与跨距必须等于实物引脚
     #    2026-10-11 新增。第一版按 1×12 生成（跨距 27.94），而实物是 13 脚

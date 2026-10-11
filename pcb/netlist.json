@@ -506,6 +506,11 @@
     }
   ],
   "total_switches": 14,
+  "switch_rot": {
+    "STOP|0": 270.0,
+    "ENTER|1": 180.0,
+    "VOICE|0": 180.0
+  },
   "mcu": {
     "name": "NoLogo ProMicro NRF52840",
     "width": 17.78,
@@ -517,7 +522,7 @@
     "on_back": true,
     "pos": [
       79.7,
-      13.77
+      14.0
     ],
     "row_dx": 15.240000000000002,
     "usb_side": "short-edge(+y)",
@@ -534,7 +539,7 @@
     "notch_depth": 8.0,
     "notch_length": 24.0,
     "notch_y0": 0.0,
-    "notch_y1": 12.0,
-    "notch_note": "右侧开缺口让位给拨杆本体，纵向区间 [0, 12]（下缘截断；上缘受主控右排最低孔约束）"
+    "notch_y1": 9.0,
+    "notch_note": "右侧开缺口让位给拨杆本体，纵向区间 [0, 9]（下缘截断；上缘受主控右排最低孔约束）"
   }
 }
