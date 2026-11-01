@@ -154,7 +154,7 @@ python tools/check_firmware.py
 
 ## 7. 编译与刷机
 
-- GitHub Actions：推送仓库后自动构建 `claudepad-xiao_ble-zmk.uf2`（以 Actions 产物名为准）。
+- GitHub Actions：推送仓库后自动构建 `claudepad-xiao_ble__zmk-zmk.uf2`（以 Actions 产物名为准）。
 - 主控：Seeed XIAO nRF52840，ZMK 板名 `xiao_ble//zmk`。
 - 刷机：双击 XIAO 上 USB-C 旁的 RESET 键进入 bootloader，拖入 uf2；首次蓝牙配对名称 `ClaudePad`。
 - 本地编译需要 west + Zephyr SDK，参考 ZMK 文档。

@@ -66,7 +66,7 @@ tools/check_hardware.py                    PCB ↔ 外壳坐标一致性检查
 
 ## 1. 编译固件
 
-把整个目录推到 GitHub 仓库即可：`.github/workflows/build.yml` 会调用 ZMK 官方 workflow，在 Actions 里产出 `claudepad-xiao_ble-zmk.uf2`（以 Actions 产物名为准）。
+把整个目录推到 GitHub 仓库即可：`.github/workflows/build.yml` 会调用 ZMK 官方 workflow，在 Actions 里产出 `claudepad-xiao_ble__zmk-zmk.uf2`（以 Actions 产物名为准）。
 
 ```bash
 git init
@@ -77,7 +77,7 @@ git remote add origin https://github.com/<用户名>/<仓库名>.git
 git push -u origin main
 ```
 
-推上去就自动触发构建；绿勾后在该次 run 页面底部 **Artifacts** 下载 `firmware`，里面是 `claudepad-xiao_ble-zmk.uf2`。仓库需是空仓库（不要先勾 README/.gitignore）；后续改键位再 `git commit && git push` 会重新构建。
+推上去就自动触发构建；绿勾后在该次 run 页面底部 **Artifacts** 下载 `firmware`，里面是 `claudepad-xiao_ble__zmk-zmk.uf2`。仓库需是空仓库（不要先勾 README/.gitignore）；后续改键位再 `git commit && git push` 会重新构建。
 
 本地编译需要 west + Zephyr SDK，参考 [ZMK 本地构建文档](https://zmk.dev/docs/development/local-toolchain/build)。
 
