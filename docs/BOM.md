@@ -7,7 +7,7 @@
 
 | # | 物料 | 规格 / 型号 | 数量 | 参考价（¥） | 搜索关键词 / 说明 |
 |---|---|---|---|---|---|
-| 1 | 主控 | Seeed Studio XIAO nRF52840（标准版，ZMK 板名 `xiao_ble`） | 1 | 45–70 | `Seeed XIAO nRF52840` / `XIAO BLE`。自带 USB-C、可按 RESET、锂电池充电、背面 BAT+/BAT− 焊盘；**用 2×7 排针穿孔焊接** |
+| 1 | 主控 | Seeed Studio XIAO nRF52840（标准版，ZMK 板名 `xiao_ble//zmk`） | 1 | 45–70 | `Seeed XIAO nRF52840` / `XIAO BLE`。自带 USB-C、可按 RESET、锂电池充电、背面 BAT+/BAT− 焊盘；**用 2×7 排针穿孔焊接** |
 | 1b | 排针 | 2× 1×7 2.54mm 单排针（可掰） | 1 组 | 1–3 | `2.54mm 单排针 1x7`。插 XIAO 的 14 个穿孔；焊后把背面过长的针脚剪到 ≤4mm，避免顶到外壳底 |
 | 2 | 轴体 | Kailh Choc V2（PG1353）矮轴 | 14 | 35–56 | `Kailh Choc V2 PG1353`。9 单键 + ENTER 2 颗 + SPACE 3 颗；建议多买 2 颗 |
 | 3 | 二极管 | 1N4148 直插 DO-35 | 11 | ≈5（50 只装） | `1N4148 DO-35`。装在 PCB 背面、轴位之间的空行，水平放置；以短丝印线为准装阴极，不要装在轴位正下方 |
@@ -78,7 +78,7 @@
 
 ## 七、下单前检查
 
-1. 主控：XIAO nRF52840 标准版，确认 USB-C、RESET、背面 BAT 焊盘；ZMK 板名 `xiao_ble`。另配 2× 1×7 2.54mm 排针，穿孔焊接。
+1. 主控：XIAO nRF52840 标准版，确认 USB-C、RESET、背面 BAT 焊盘；ZMK 板名 `xiao_ble//zmk`。另配 2× 1×7 2.54mm 排针，穿孔焊接。
 2. PCB：**2 层**、90×76mm、1.6mm；XIAO 位置是 14 个 1.0mm 穿孔焊盘；Gerber 在 `pcb/output/gerbers/`；不要选错层数。
 3. 先打印 **test_coupon.stl**，确定 `SWITCH_PLATE_GAP` 后再打印底座/定位板。
 4. 键帽：Choc V2 / 18×17mm；2u、3u 先确认有货。

@@ -6,7 +6,7 @@
 - `config/boards/shields/claudepad/claudepad.keymap`：行为、宏、键位
 - `config/boards/shields/claudepad/claudepad.conf`：ZMK 选项
 
-主控为 **Seeed XIAO nRF52840**（ZMK 板名 `xiao_ble`），矩阵行用 D0/D1/D2，列用 D6–D10。无审批拨杆、无电源开关。
+主控为 **Seeed XIAO nRF52840**（ZMK 板名 `xiao_ble//zmk`），矩阵行用 D0/D1/D2，列用 D6–D10。无审批拨杆、无电源开关。
 硬件：[PCB 制造与焊接](pcb.md)｜[外壳/定位板/键帽](cad.md)。
 
 ## 1. 物理布局
@@ -154,8 +154,8 @@ python tools/check_firmware.py
 
 ## 7. 编译与刷机
 
-- GitHub Actions：推送仓库后自动构建 `claudepad-xiao_ble.uf2`（以 Actions 产物名为准）。
-- 主控：Seeed XIAO nRF52840，ZMK 板名 `xiao_ble`。
+- GitHub Actions：推送仓库后自动构建 `claudepad-xiao_ble-zmk.uf2`（以 Actions 产物名为准）。
+- 主控：Seeed XIAO nRF52840，ZMK 板名 `xiao_ble//zmk`。
 - 刷机：双击 XIAO 上 USB-C 旁的 RESET 键进入 bootloader，拖入 uf2；首次蓝牙配对名称 `ClaudePad`。
 - 本地编译需要 west + Zephyr SDK，参考 ZMK 文档。
 

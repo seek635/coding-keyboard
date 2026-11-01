@@ -2,7 +2,7 @@
 
 专为 Claude Code 打造的 ZMK 宏键盘：11 个按键，把权限切换、打断、模型切换、`@` 文件引用和语音对讲映射到实体键上。
 
-- 固件：ZMK（Seeed XIAO nRF52840，ZMK 板名 `xiao_ble`）
+- 固件：ZMK（Seeed XIAO nRF52840，ZMK 板名 `xiao_ble//zmk`）
 - 上位机：Windows + Python 3.12，零第三方依赖
 - PCB：2 层、90 × 76 mm、1.6 mm；XIAO 为 **14 个穿孔焊盘（2×7 2.54mm 排针）**，11 个二极管、14 颗 Choc V2 轴
 - 外壳：3D 打印底座 + 定位板 + 键帽，整机约 108 × 82 × 23.1 mm；控制器仓敞开，USB-C/RESET 可直接操作；后壁 USB-C 开口已按排针高度上移
@@ -66,18 +66,18 @@ tools/check_hardware.py                    PCB ↔ 外壳坐标一致性检查
 
 ## 1. 编译固件
 
-把整个目录推到 GitHub 仓库即可：`.github/workflows/build.yml` 会调用 ZMK 官方 workflow，在 Actions 里产出 `claudepad-xiao_ble.uf2`（以 Actions 产物名为准）。
+把整个目录推到 GitHub 仓库即可：`.github/workflows/build.yml` 会调用 ZMK 官方 workflow，在 Actions 里产出 `claudepad-xiao_ble-zmk.uf2`（以 Actions 产物名为准）。
 
 ```bash
 git init
 git add .
 git commit -m "ClaudePad v1"
 git branch -M main
-git remote add origin https://github.com/<用户名>/claudepad.git
+git remote add origin https://github.com/<用户名>/<仓库名>.git
 git push -u origin main
 ```
 
-推上去就自动触发构建；绿勾后在该次 run 页面底部 **Artifacts** 下载 `firmware`，里面是 `claudepad-xiao_ble.uf2`。仓库需是空仓库（不要先勾 README/.gitignore）；后续改键位再 `git commit && git push` 会重新构建。
+推上去就自动触发构建；绿勾后在该次 run 页面底部 **Artifacts** 下载 `firmware`，里面是 `claudepad-xiao_ble-zmk.uf2`。仓库需是空仓库（不要先勾 README/.gitignore）；后续改键位再 `git commit && git push` 会重新构建。
 
 本地编译需要 west + Zephyr SDK，参考 [ZMK 本地构建文档](https://zmk.dev/docs/development/local-toolchain/build)。
 

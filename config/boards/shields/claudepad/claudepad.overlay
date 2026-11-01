@@ -1,7 +1,7 @@
 /*
  * ClaudePad shield
  *
- * Seeed XIAO nRF52840 (ZMK board: xiao_ble), hand-wired.
+ * Seeed XIAO nRF52840 (ZMK board: xiao_ble//zmk), hand-wired.
  *
  * 3 rows x 5 columns, 11 used intersections:
  *   row 0: PERM MODEL CMD UP VOICE
