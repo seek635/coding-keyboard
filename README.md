@@ -11,7 +11,7 @@
 
 ![ClaudePad 成品预览](docs/preview/claudepad-hero.png)
 
-更多预览：[正俯视](docs/preview/claudepad-top.png)｜[爆炸图](docs/preview/claudepad-exploded.png)｜[PCB](docs/preview/claudepad-pcb.png)
+更多预览：[正俯视](docs/preview/claudepad-top.png)｜[爆炸图](docs/preview/claudepad-exploded.png)｜[PCB](docs/preview/claudepad-pcb.png)｜**焊接 3D 指导图**：[正面](docs/3d/guide-front-iso.png) / [俯视布局](docs/3d/guide-top.png) / [背面](docs/3d/guide-bottom-iso.png) / [总装](docs/3d/guide-assembled.png)
 
 ## 键位
 

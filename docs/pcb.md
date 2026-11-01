@@ -141,6 +141,19 @@ BAT1 在 JST 旁边（模块右侧，主板投影外）：
 4. 电池极性：JST pin1 = BAT+，pin2 = BAT-；用万用表确认。
 5. 刷固件后用键盘测试网站逐键检查；再按 [host/README.md](../host/README.md) 测上位机。
 
+## 7.5 焊接 3D 指导图
+
+配套的 3D 焊接指导图（由 `tools/render_assembly.py` 从 PCB/外壳 STL + 参数生成，纯 Python，无需 OpenSCAD）：
+
+| 图 | 内容 |
+|---|---|
+| [正面 3/4（3D）](3d/guide-front-iso.png) | 焊好的正面：14 个轴体、XIAO + 2×7 排针、JST、电池线走向 |
+| [俯视布局图](3d/guide-top.png) | 矩阵 R0–R2 × C0–C4、11 个键位、R1/C1 空位、pin1 方向 |
+| [背面 3/4（3D）](3d/guide-bottom-iso.png) | 11 个 1N4148 的位置与阴极方向、排针脚、BAT1 焊盘 |
+| [总装（3D）](3d/guide-assembled.png) | 底座 + 定位板 + 键帽的总装效果 |
+
+重新生成：`python tools/render_assembly.py`（约 1 分钟，输出到 `docs/3d/`）。
+
 ## 8. 已验证
 
 - KiCad DRC：**0 violations, 0 unconnected pads, 0 footprint errors**（2026-10-27，2 层改版后复检，`pcb/output/drc.rpt`）
