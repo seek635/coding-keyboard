@@ -1,0 +1,16 @@
+(module D_1N4148_DO35 (layer B.Cu) (tedit 0)
+  (descr "1N4148 DO-35 through-hole diode, horizontal on bottom, cathode at +X")
+  (tags "diode 1N4148 DO-35")
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  (pad 1 thru_hole oval (at -3.5 0) (size 1.6 1.6) (drill 0.8) (layers *.Cu *.Mask))
+  (pad 2 thru_hole oval (at 3.5 0) (size 1.6 1.6) (drill 0.8) (layers *.Cu *.Mask))
+  (fp_line (start 2.4 -1.0) (end 2.4 1.0) (layer B.SilkS) (width 0.2))
+)

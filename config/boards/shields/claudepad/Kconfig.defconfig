@@ -1,0 +1,6 @@
+if SHIELD_CLAUDEPAD
+
+config ZMK_KEYBOARD_NAME
+    default "ClaudePad"
+
+endif

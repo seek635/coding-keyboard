@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+pcb/*.kicad_prl
+
+# Scratch: extracted vendor archive of the XIAO design package
+.tmp_rar/
+
+# Firmware build artifacts
+build/
+*.uf2

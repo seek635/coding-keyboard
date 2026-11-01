@@ -1,0 +1,155 @@
+/*
+ * ClaudePad keymap
+ *
+ * Position order comes from claudepad.overlay's default_transform:
+ *   0 PERM   1 MODEL  2 CMD   3 UP    4 VOICE
+ *   5 STOP   6 LEFT   7 DOWN  8 RIGHT
+ *   9 ENTER 10 SPACE
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+
+/ {
+    behaviors {
+        /* PERM: tap Shift+Tab + F16 sync, hold sends the reset signal (F15). */
+        perm_ht: perm_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <250>;
+            bindings = <&kp>, <&mac_perm_cycle>;
+        };
+
+        /* MODEL: tap types /model + Enter, hold sends the cycle signal (F14). */
+        model_ht: model_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <250>;
+            bindings = <&kp>, <&mac_model>;
+        };
+
+        /* CMD: tap /, hold @. */
+        cmd_ht: cmd_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&kp>, <&kp>;
+        };
+
+        /* SPACE: tap Space, hold Tab, with the three accidental-hold guards. */
+        space_ht: space_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <300>;
+            quick-tap-ms = <150>;
+            require-prior-idle-ms = <120>;
+            bindings = <&kp>, <&kp>;
+        };
+
+        /* Inner hold of STOP: 200ms tap-dance + 1000ms hold = 1200ms total. */
+        stop_ht: stop_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <1000>;
+            bindings = <&mac_stop_exit>, <&kp>;
+        };
+
+        /* STOP: single Esc, double Ctrl+C, long Ctrl+C twice. */
+        stop_td: stop_td {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&stop_ht 0 ESC>, <&kp LC(C)>;
+        };
+
+        /* ENTER: single Enter, double Shift+Enter. */
+        enter_td: enter_td {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&kp ENTER>, <&kp LS(ENTER)>;
+        };
+
+        /* Inner VOICE: hold means push-to-talk; a single tap still types Space. */
+        voice_ht: voice_ht {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <50>;
+            bindings = <&kp>, <&kp>;
+        };
+
+        /* VOICE: single Space, double /voice, hold Space for push-to-talk. */
+        voice_td: voice_td {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <180>;
+            bindings = <&voice_ht SPACE SPACE>, <&mac_voice>;
+        };
+    };
+
+    macros {
+        /*
+         * Shift+Tab cycles Claude Code's permission mode. F16 follows it as a
+         * host-only sync signal so the companion can track the new mode.
+         */
+        mac_perm_cycle: mac_perm_cycle {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            wait-ms = <10>;
+            tap-ms = <10>;
+            bindings = <&kp LS(TAB)>, <&kp F16>;
+        };
+
+        /* One-param so it can share the hold-tap's two-cell binding with &kp. */
+        mac_model: mac_model {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            wait-ms = <15>;
+            tap-ms = <10>;
+            bindings = <&kp SLASH>, <&kp M>, <&kp O>, <&kp D>, <&kp E>, <&kp L>, <&kp ENTER>;
+        };
+
+        mac_voice: mac_voice {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <15>;
+            tap-ms = <10>;
+            bindings = <&kp SLASH>, <&kp V>, <&kp O>, <&kp I>, <&kp C>, <&kp E>, <&kp ENTER>;
+        };
+
+        mac_stop_exit: mac_stop_exit {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            wait-ms = <20>;
+            tap-ms = <20>;
+            bindings = <&kp LC(C)>, <&macro_wait_time 60>, <&kp LC(C)>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            display-name = "ClaudePad";
+            bindings = <
+                &perm_ht LC(LA(LS(F15))) 0
+                &model_ht LC(LA(LS(F14))) 0
+                &cmd_ht AT_SIGN SLASH
+                &kp UP
+                &voice_td
+                &stop_td
+                &kp LEFT
+                &kp DOWN
+                &kp RIGHT
+                &enter_td
+                &space_ht TAB SPACE
+            >;
+        };
+    };
+};

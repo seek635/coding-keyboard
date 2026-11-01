@@ -1,0 +1,10 @@
+(module BAT_WIRE_PADS (layer B.Cu) (tedit 0)
+  (descr "Solder pads for XIAO BAT+ / BAT- wires routed through the PCB window")
+  (tags "battery bat wire pad")
+  
+  
+  
+  
+  (pad 1 thru_hole circle (at 0 0) (size 1.6 1.6) (drill 0.8) (layers *.Cu *.Mask))
+  (pad 2 thru_hole circle (at 0 2.0) (size 1.6 1.6) (drill 0.8) (layers *.Cu *.Mask))
+)
