@@ -1,3 +1,5 @@
 include:
-  - board: xiao_ble
+  # ZMK main (Zephyr 4.1 / HWMv2) requires the ZMK board variant.
+  # Older ZMK (v0.3 and earlier) used plain `xiao_ble`.
+  - board: xiao_ble//zmk
     shield: claudepad
