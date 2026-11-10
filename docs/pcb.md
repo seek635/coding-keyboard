@@ -151,6 +151,7 @@ BAT1 在 JST 旁边（模块右侧，主板投影外）：
 | [俯视布局图](3d/guide-top.png) | 矩阵 R0–R2 × C0–C4、11 个键位、R1/C1 空位、pin1 方向 |
 | [背面 3/4（3D）](3d/guide-bottom-iso.png) | 11 个 1N4148 的位置与阴极方向、排针脚、BAT1 焊盘 |
 | [总装（3D）](3d/guide-assembled.png) | 底座 + 定位板 + 键帽的总装效果 |
+| [正反面识别](3d/board-sides.png) | 靠丝印区分正反面：正面有键名/R/C 编号，背面只有 BAT+/BAT− 与二极管阴极短线 |
 
 重新生成：`python tools/render_assembly.py`（约 1 分钟，输出到 `docs/3d/`）。
 
