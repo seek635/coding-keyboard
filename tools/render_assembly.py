@@ -319,6 +319,22 @@ def erode(mask, it=1):
     return m
 
 
+# KiCad exports 3D/STEP in a frame where Y = -Y(board).  The fabricated board
+# follows the 3D/STEP frame, so the board-coordinate scene must be mirrored in Y
+# to match the real PCB (and the KiCad previews).
+Y_MIRROR = 82.0
+
+
+def mirror_y(tri):
+    out = tri.copy()
+    out[:, :, 1] = Y_MIRROR - out[:, :, 1]
+    return out[:, [0, 2, 1]]
+
+
+def my_point(p):
+    return (p[0], Y_MIRROR - p[1], p[2])
+
+
 def render(cam: Camera, meshes, ss=2, lights=None, edge_color=0.42):
     """meshes: list of (triangles, rgb) tuples."""
     W, H = cam.width, cam.height
@@ -333,6 +349,7 @@ def render(cam: Camera, meshes, ss=2, lights=None, edge_color=0.42):
     for tris, col in meshes:
         if len(tris) == 0:
             continue
+        tris = mirror_y(tris)
         v = tris - cam.pos
         cx, cy, cz = v @ cam.r, v @ cam.u, v @ cam.f
         if cam.ortho_scale is not None:
@@ -433,7 +450,7 @@ def draw_callouts(img, cam, callouts, *, title, subtitle, fsize=30,
     draw.text((48, 94), subtitle, font=f_sub, fill=(90, 90, 90))
 
     for c in callouts:
-        ax, ay, _ = cam.project([c["anchor"]])
+        ax, ay, _ = cam.project([my_point(c["anchor"])])
         ax, ay = float(ax[0]), float(ay[0])
         text = c["text"]
         lines = text.split("\n")
@@ -553,7 +570,7 @@ def scene_soldered_bottom():
 # views
 # ---------------------------------------------------------------------------
 def project_anchor(cam, p):
-    sx, sy, _ = cam.project([p])
+    sx, sy, _ = cam.project([my_point(p)])
     return float(sx[0]), float(sy[0])
 
 
@@ -565,21 +582,19 @@ def view_front_iso():
     img = render(cam, meshes, ss=2,
                  lights=[((0.35, -0.5, 0.79), 0.62), ((-0.6, -0.2, 0.4), 0.24)])
     callouts = [
-        dict(anchor=(54, 12, Z_TOP + 7.3), xy=(250, 1140),
-             text="U1  XIAO nRF52840\n2×7 排针，抬高 2.5mm\nUSB-C 朝后边"),
-        dict(anchor=(76, 12, Z_TOP + 4.5), xy=(1120, 1280),
+        dict(anchor=(54, 12, Z_TOP + 7.3), xy=(1040, 170),
+             text="U1  XIAO nRF52840\n2×7 排针，抬高 2.5mm\n背面 BAT 焊盘引电池线"),
+        dict(anchor=(76, 12, Z_TOP + 4.5), xy=(1450, 360),
              text="J1  JST-PH 2.0\npin1 = BAT+"),
-        dict(anchor=(58, 18, Z_TOP + 1.2), xy=(120, 940),
-             text="电池线：XIAO 背面 BAT 焊盘\n沿模块右侧走到 BAT1"),
-        dict(anchor=(85.5, 14, Z_TOP), xy=(1420, 1300),
+        dict(anchor=(85.5, 14, Z_TOP), xy=(1980, 720), align="right",
              text="走线槽 4×8mm\n电池线穿到背面"),
-        dict(anchor=(18, 30.5, Z_TOP + 7.9), xy=(110, 330),
-             text="SW1–SW5  R0 上排\nPERM MODEL CMD ↑ VOICE"),
-        dict(anchor=(18, 47.5, Z_TOP + 7.9), xy=(110, 500),
-             text="SW6–SW9  R1 中排\nSTOP ← ↓ →"),
-        dict(anchor=(72, 64.5, Z_TOP + 7.9), xy=(1250, 330),
-             text="SW10–SW14  R2 下排\nENTER 2 轴 / SPACE 3 轴\n每个轴位 pin1 在左下角"),
-        dict(anchor=(90, 55.5, Z_TOP + 4.9), xy=(1980, 860), align="right",
+        dict(anchor=(18, 30.5, Z_TOP + 7.9), xy=(120, 190),
+             text="SW1–SW5  R0（靠 USB 一端）\nPERM MODEL CMD ↑ VOICE"),
+        dict(anchor=(18, 47.5, Z_TOP + 7.9), xy=(120, 400),
+             text="SW6–SW9  R1\nSTOP ← ↓ →"),
+        dict(anchor=(72, 64.5, Z_TOP + 7.9), xy=(260, 1120),
+             text="SW10–SW14  R2（使用者一侧）\nENTER 2 轴 / SPACE 3 轴\npin1 在轴位左下角"),
+        dict(anchor=(90, 55.5, Z_TOP + 4.9), xy=(1980, 1120), align="right",
              text="14 个 Choc V2 轴\n焊前先确认方向"),
     ]
     img = draw_callouts(img, cam, callouts,
@@ -602,22 +617,22 @@ def view_top():
     img = render(cam, meshes, ss=2,
                  lights=[((0.25, -0.2, 0.95), 0.70), ((-0.4, 0.3, 0.5), 0.20)])
     callouts = [
-        dict(anchor=(54, 12, Z_TOP + 7.3), xy=(2045, 1660),
+        dict(anchor=(54, 12, Z_TOP + 7.3), xy=(2490, 380), align="right",
              text="U1  XIAO nRF52840\n2×7 排针，抬高 2.5mm"),
-        dict(anchor=(76, 12, Z_TOP + 4.5), xy=(2045, 1470),
+        dict(anchor=(76, 12, Z_TOP + 4.5), xy=(2490, 520), align="right",
              text="J1  JST-PH 2.0\npin1 = BAT+"),
-        dict(anchor=(85.5, 14, Z_TOP), xy=(2045, 1310),
+        dict(anchor=(85.5, 14, Z_TOP), xy=(2490, 660), align="right",
              text="走线槽 4×8mm"),
-        dict(anchor=(54, 47.5, Z_TOP + 6.3), xy=(2045, 820),
-             text="R1/C1 空位\n不装轴、不补孔"),
-        dict(anchor=(72, 64.5, Z_TOP + 6.3), xy=(2045, 470),
+        dict(anchor=(72, 64.5, Z_TOP + 6.3), xy=(2490, 820), align="right",
              text="SPACE 3u\nSW12+SW13+SW14 并联"),
-        dict(anchor=(18, 30.5, Z_TOP + 6.3), xy=(40, 1030),
-             text="SW1–SW5  R0\nPERM MODEL CMD ↑ VOICE"),
-        dict(anchor=(18, 47.5, Z_TOP + 6.3), xy=(40, 720),
+        dict(anchor=(72, 64.5, Z_TOP + 6.3), xy=(2490, 1000), align="right",
+             text="SW10–SW14  R2（使用者一侧）\nENTER 2u：SW10+SW11 并联"),
+        dict(anchor=(18, 30.5, Z_TOP + 6.3), xy=(40, 650),
+             text="SW1–SW5  R0（靠 USB 一端）\nPERM MODEL CMD ↑ VOICE"),
+        dict(anchor=(18, 47.5, Z_TOP + 6.3), xy=(40, 930),
              text="SW6–SW9  R1\nSTOP ← ↓ →"),
-        dict(anchor=(27, 64.5, Z_TOP + 6.3), xy=(40, 400),
-             text="SW10–SW14  R2\nENTER 2u：SW10+SW11 并联\npin1 在轴位左下角"),
+        dict(anchor=(36, 47.5, Z_TOP + 6.3), xy=(40, 1090),
+             text="R1/C1 空位\n不装轴、不补孔"),
     ]
     img = draw_callouts(img, cam, callouts, fsize=27,
                         title="ClaudePad · 焊好的正面（俯视布局图）",
@@ -628,8 +643,8 @@ def view_top():
         px, py = project_anchor(cam, (x, 80.6, Z_TOP))
         d.text((px - 15, py - 8), f"C{i}", font=f_small, fill=(70, 70, 70))
     px, _ = project_anchor(cam, (54, 41, Z_TOP))
-    d.text((px - 130, 150), "↑ 板边为使用者一侧（前）", font=font(26), fill=(80, 80, 80))
-    d.text((px - 140, 1720), "↓ 板下边为 USB-C / 控制器仓（后）", font=font(26), fill=(80, 80, 80))
+    d.text((px - 120, 150), "↑ USB-C / 控制器仓（后）", font=font(26), fill=(80, 80, 80))
+    d.text((px - 120, 1720), "↓ 使用者一侧（前）", font=font(26), fill=(80, 80, 80))
     img.save(OUT / "guide-top.png")
     print("wrote", OUT / "guide-top.png")
 
@@ -642,19 +657,19 @@ def view_bottom_iso():
     img = render(cam, meshes, ss=2,
                  lights=[((0.35, -0.5, -0.79), 0.62), ((-0.6, -0.2, -0.4), 0.24)])
     callouts = [
-        dict(anchor=(18, 38.5, -1.15), xy=(80, 1120),
+        dict(anchor=(18, 38.5, -1.15), xy=(60, 1040),
              text="D1–D5  R0/R1 之间\n阴极（短丝印线）朝右"),
-        dict(anchor=(18, 55.5, -1.15), xy=(80, 1270),
+        dict(anchor=(18, 55.5, -1.15), xy=(60, 880),
              text="D6–D9  R1/R2 之间\n阴极朝右"),
-        dict(anchor=(27, 74.5, -1.15), xy=(560, 1370),
+        dict(anchor=(27, 74.5, -1.15), xy=(60, 720),
              text="D10  ENTER 共用\n转 180°，阴极朝左"),
-        dict(anchor=(63, 74.5, -1.15), xy=(1230, 1330),
+        dict(anchor=(63, 74.5, -1.15), xy=(1000, 90),
              text="D11  SPACE 共用\n转 180°，阴极朝左"),
-        dict(anchor=(54, 12, -2.6), xy=(150, 640),
+        dict(anchor=(54, 12, -2.6), xy=(1150, 1250),
              text="XIAO 排针脚\n焊完剪到 ≤ 4mm"),
-        dict(anchor=(70, 18.5, 0), xy=(1980, 470), align="right",
+        dict(anchor=(70, 18.5, 0), xy=(1980, 700), align="right",
              text="BAT1  BAT+ / BAT−\n电池线焊盘"),
-        dict(anchor=(85.5, 14, 0), xy=(1600, 200),
+        dict(anchor=(85.5, 14, 0), xy=(1980, 900), align="right",
              text="走线槽（贯穿板）"),
     ]
     img = draw_callouts(img, cam, callouts,
@@ -672,13 +687,13 @@ def view_assembled():
     img = render(cam, meshes, ss=2,
                  lights=[((0.4, -0.5, 0.76), 0.58), ((-0.55, -0.2, 0.45), 0.26)])
     callouts = [
-        dict(anchor=(90, 30.5, 14.9), xy=(1450, 980),
-             text="定位板 1.2mm\n14 个 14.5mm 方孔 + 侧卡扣槽"),
-        dict(anchor=(72, 64.5, 18.6), xy=(1120, 1270),
-             text="键帽：1u×9 / 2u×1 / 3u×1\nSPACE 3u 跨 3 颗轴"),
-        dict(anchor=(54, 12, 15.9), xy=(180, 1140),
+        dict(anchor=(54, 12, 15.9), xy=(1000, 170),
              text="控制器仓敞开\nUSB-C / RESET 可直接操作"),
-        dict(anchor=(60, 78, 8), xy=(1350, 1330),
+        dict(anchor=(90, 30.5, 14.9), xy=(1980, 500), align="right",
+             text="定位板 1.2mm\n14 个 14.5mm 方孔 + 侧卡扣槽"),
+        dict(anchor=(72, 64.5, 18.6), xy=(450, 1080),
+             text="键帽：1u×9 / 2u×1 / 3u×1\nSPACE 3u 跨 3 颗轴"),
+        dict(anchor=(60, 78, 8), xy=(1980, 1250), align="right",
              text="底座 4 个支撑柱托住 PCB\n4 颗 M2×6 自攻螺丝"),
     ]
     img = draw_callouts(img, cam, callouts,
