@@ -4,8 +4,21 @@ __pycache__/
 .pytest_cache/
 pcb/*.kicad_prl
 
+# Local sandbox permission-repair records (never part of the project)
+.sandbox-acl-recovery/
+
 # Scratch: extracted vendor archive of the XIAO design package
 .tmp_rar/
+
+# Scratch: one-off footprint dumps from vendor repos
+.kiswitch_tree.json
+.choc_wrl.json
+.choc_step.json
+.chocv2_bottom.json
+.gh_pg1353.json
+.pg1353_fp.json
+.mxv2_tree.json
+.koktoh_tree.json
 
 # Firmware build artifacts
 build/

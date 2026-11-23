@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClaudePad 按键测试</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    background: #14161a; color: #e6e8eb;
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+  h2 { font-size: 13px; margin: 0 0 10px; color: #9aa4b2; font-weight: 600; letter-spacing: .04em; }
+  .hint { margin: 0 0 20px; font-size: 13px; color: #8b95a3; }
+  main { display: grid; gap: 16px; max-width: 1080px; }
+  .hud {
+    display: flex; align-items: center; gap: 20px;
+    border: 1px solid #262b33; border-radius: 10px; padding: 18px 22px;
+    background: #1a1d23;
+  }
+  .hud .k {
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 40px; line-height: 1; font-weight: 700; color: #7ee787;
+    min-width: 180px;
+  }
+  .hud .meta { font-family: ui-monospace, Consolas, monospace; font-size: 13px; color: #9aa4b2; display: grid; gap: 4px; }
+  .hud .meta b { color: #e6e8eb; font-weight: 600; }
+  .panels { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
+  .panel { border: 1px solid #262b33; border-radius: 10px; padding: 14px 16px; background: #1a1d23; min-height: 180px; }
+  .counts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .counts span {
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+    padding: 3px 8px; border-radius: 999px; background: #232830; color: #c9d1d9;
+  }
+  .counts span.empty { background: none; color: #667080; font-family: inherit; }
+  #log { margin: 0; padding-left: 18px; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; max-height: 320px; overflow: auto; }
+  #log li { color: #c9d1d9; padding: 1px 0; }
+  #log li .t { color: #5b6574; }
+  #log li .mods { color: #d2a8ff; }
+  .row { display: flex; gap: 8px; }
+  button {
+    font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 7px; cursor: pointer;
+    background: #232830; color: #e6e8eb; border: 1px solid #303743;
+  }
+  button:hover { background: #2b313b; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #232830; }
+  th { color: #9aa4b2; font-weight: 600; font-size: 12px; letter-spacing: .03em; }
+  td.k { font-family: ui-monospace, Consolas, monospace; color: #7ee787; }
+  td.muted { color: #8b95a3; }
+  code { font-family: ui-monospace, Consolas, monospace; background: #232830; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>ClaudePad 按键测试</h1>
+    <p class="hint">点一下页面空白处让它获得焦点，然后逐个按键。Esc、Tab、空格、方向键、F14–F16 都已拦截，不会触发浏览器操作。真死键不会出现在右侧“已捕获的键”里。</p>
+  </div>
+
+  <div class="hud">
+    <div class="k" id="hudKey">—</div>
+    <div class="meta">
+      <div>code <b id="hudCode">—</b></div>
+      <div>key <b id="hudRaw">—</b></div>
+      <div>mods <b id="hudMods">—</b></div>
+    </div>
+  </div>
+
+  <div class="panels">
+    <section class="panel">
+      <h2>已捕获的键（按下次数）</h2>
+      <div class="counts" id="counts"><span class="empty">还没有按键</span></div>
+      <div class="row">
+        <button id="reset">清空</button>
+        <button id="copy">复制日志</button>
+        <button id="save">下载 TXT</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>事件日志（最新在上）</h2>
+      <ol id="log"></ol>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>期望对照表</h2>
+    <table>
+      <thead><tr><th>物理键</th><th>单击</th><th>双击</th><th>长按</th></tr></thead>
+      <tbody>
+        <tr><td class="k">PERM</td><td>Tab + Shift（同时出现 F16）</td><td class="muted">—</td><td>Ctrl+Alt+Shift+F15</td></tr>
+        <tr><td class="k">MODEL</td><td>依次打出 / m o d e l + Enter</td><td class="muted">—</td><td>Ctrl+Alt+Shift+F14</td></tr>
+        <tr><td class="k">CMD</td><td>/</td><td class="muted">—</td><td>@</td></tr>
+        <tr><td class="k">↑ ↓ ← →</td><td colspan="2">方向键，按住会连续重复</td><td class="muted">—</td></tr>
+        <tr><td class="k">STOP</td><td>Esc</td><td>Ctrl+C</td><td>Ctrl+C 两次</td></tr>
+        <tr><td class="k">ENTER</td><td>Enter</td><td>Shift+Enter</td><td class="muted">—</td></tr>
+        <tr><td class="k">SPACE</td><td>空格</td><td class="muted">—</td><td>Tab</td></tr>
+        <tr><td class="k">VOICE</td><td>空格</td><td>依次打出 / v o i c e + Enter</td><td>按住保持空格</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+(() => {
+  const hudKey = document.getElementById('hudKey');
+  const hudCode = document.getElementById('hudCode');
+  const hudRaw = document.getElementById('hudRaw');
+  const hudMods = document.getElementById('hudMods');
+  const logEl = document.getElementById('log');
+  const countsEl = document.getElementById('counts');
+  const counts = new Map();
+  const lines = [];
+
+  const MODS = ['ctrlKey', 'altKey', 'shiftKey', 'metaKey'];
+  const modNames = { ctrlKey: 'Ctrl', altKey: 'Alt', shiftKey: 'Shift', metaKey: 'Win' };
+
+  function modList(e) {
+    const m = MODS.filter(k => e[k]).map(k => modNames[k]);
+    return m.length ? m.join('+') : '—';
+  }
+
+  function renderCounts() {
+    countsEl.innerHTML = '';
+    if (counts.size === 0) {
+      const s = document.createElement('span');
+      s.className = 'empty';
+      s.textContent = '还没有按键';
+      countsEl.appendChild(s);
+      return;
+    }
+    [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([code, n]) => {
+        const s = document.createElement('span');
+        s.textContent = `${code} × ${n}`;
+        countsEl.appendChild(s);
+      });
+  }
+
+  function pushLog(e) {
+    const mods = modList(e);
+    const line = `${e.code}${e.repeat ? ' (repeat)' : ''} key=${e.key} mods=${mods}`;
+    lines.unshift(line);
+    if (lines.length > 400) lines.length = 400;
+
+    const li = document.createElement('li');
+    const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+    li.innerHTML = `<span class="t">${time}</span> ${e.code}`
+      + (e.repeat ? ' <span class="t">repeat</span>' : '')
+      + ` <span class="t">key=</span>${escapeHtml(e.key)}`
+      + (mods === '—' ? '' : ` <span class="mods">${mods}</span>`);
+    logEl.prepend(li);
+    while (logEl.children.length > 300) logEl.lastChild.remove();
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+
+  addEventListener('keydown', e => {
+    // Let the browser keep its own refresh / devtools / menu shortcuts.
+    if (!e.ctrlKey && !e.metaKey && !e.altKey) e.preventDefault();
+    if (e.key === 'F5' || e.key === 'F12') return;
+
+    if (!e.repeat) {
+      counts.set(e.code, (counts.get(e.code) || 0) + 1);
+      renderCounts();
+      pushLog(e);
+    }
+    hudKey.textContent = e.repeat ? hudKey.textContent : (e.key.length === 1 ? e.key : e.key.toUpperCase());
+    hudCode.textContent = e.code;
+    hudRaw.textContent = e.key;
+    hudMods.textContent = modList(e);
+    document.querySelector('.hud').style.borderColor = '#3b4a3f';
+    setTimeout(() => { document.querySelector('.hud').style.borderColor = '#262b33'; }, 120);
+  }, { capture: true });
+
+  addEventListener('keyup', e => {
+    if (!e.ctrlKey && !e.metaKey && !e.altKey) e.preventDefault();
+  }, { capture: true });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    counts.clear();
+    lines.length = 0;
+    logEl.innerHTML = '';
+    renderCounts();
+    hudKey.textContent = '—';
+    hudCode.textContent = '—';
+    hudRaw.textContent = '—';
+    hudMods.textContent = '—';
+  });
+
+  document.getElementById('copy').addEventListener('click', async () => {
+    const text = lines.slice().reverse().join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      flashButton('copy', '已复制');
+    } catch {
+      flashButton('copy', '复制失败，用下载');
+    }
+  });
+
+  document.getElementById('save').addEventListener('click', () => {
+    const text = lines.slice().reverse().join('\n');
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `claudepad-keytest-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  function flashButton(id, msg) {
+    const b = document.getElementById(id);
+    const old = b.textContent;
+    b.textContent = msg;
+    setTimeout(() => { b.textContent = old; }, 1200);
+  }
+
+  renderCounts();
+})();
+</script>
+</body>
+</html>
